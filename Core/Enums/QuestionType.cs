@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Interfaces.Base
+namespace Core.Enums
 {
-    public interface Service
+    public enum QuestionType
     {
+        Closed,
+        Open
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public interface UserService
+    public interface IUserService
     {
         Task<IEnumerable<UserBaseDTO>> GetAll();
         Task<UserBaseDTO> Get(string id);

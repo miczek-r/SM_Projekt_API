@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepositoryImp : RepositoryImp<User>, UserRepository
+    public class PollRepository : Repository<Poll>, Core.Repositories.IPollRepository
     {
-        public UserRepositoryImp(IdentityDbContext dbContext) : base(dbContext)
+        public PollRepository(IdentityDbContext dbContext) : base(dbContext)
         {
         }
     }

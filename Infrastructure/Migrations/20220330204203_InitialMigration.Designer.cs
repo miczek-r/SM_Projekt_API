@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220330204203_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +35,7 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("QuestionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Text")
+                    b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -57,15 +59,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PollType")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Polls");
@@ -85,11 +78,11 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("PollId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Type")
                         .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -146,9 +139,6 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PollId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -168,8 +158,6 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("PollId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -344,13 +332,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("PollId");
                 });
 
-            modelBuilder.Entity("Core.Entities.User", b =>
-                {
-                    b.HasOne("Core.Entities.Poll", null)
-                        .WithMany("AllowedUsers")
-                        .HasForeignKey("PollId");
-                });
-
             modelBuilder.Entity("Core.Entities.UserQuestionAnswer", b =>
                 {
                     b.HasOne("Core.Entities.Answer", "Answer")
@@ -431,8 +412,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Poll", b =>
                 {
-                    b.Navigation("AllowedUsers");
-
                     b.Navigation("Questions");
                 });
 

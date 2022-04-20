@@ -17,14 +17,14 @@ using Application.Exceptions;
 
 namespace Application.Services
 {
-    public class AuthenticationServiceImp : AuthenticationService
+    public class AuthenticationService : IAuthenticationService
     {
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AuthenticationServiceImp(UserRepository userRepository, UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration)
+        public AuthenticationService(IUserRepository userRepository, UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _userManager = userManager;

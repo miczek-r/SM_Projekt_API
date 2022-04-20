@@ -10,16 +10,13 @@ namespace SM_Projekt.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly AuthenticationService _authenticationService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public AuthenticationController(AuthenticationService authenticationService)
+        public AuthenticationController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
 
-       
-
-        // POST api/<ValuesController>
         [HttpPost("/login")]
         public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginDTO loginDTO)
         {

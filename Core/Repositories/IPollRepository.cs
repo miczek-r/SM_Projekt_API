@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Core.Repositories
 {
-    public interface UserRepository : Repository<User>
+    public interface IPollRepository : IRepository<Poll>
     {
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Application.DTO;
-using Application.Interfaces.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public interface AuthenticationService : Service
+    public interface IAuthenticationService
     {
         Task<LoginResponseDTO> Login(LoginDTO model);
         Task<TokenInfoDTO> RefreshToken(string refreshToken);

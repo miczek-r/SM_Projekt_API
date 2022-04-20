@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Core.Repositories.Base
 {
-    public interface Repository<T> where T : class
+    public interface IRepository<T> where T : class
     {
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<T> GetByIdAsync(int id);

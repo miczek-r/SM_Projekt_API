@@ -1,6 +1,5 @@
 using Application.DTO;
 using Application.Interfaces;
-using Application.Interfaces.Base;
 using Application.Mappers;
 using Application.Services;
 using Application.Validators.User;
@@ -16,6 +15,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scrutor;
 using SM_Projekt.Helpers;
+using Core.Repositories.Base;
+using Infrastructure.Repositories.Base;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,9 +36,19 @@ builder.Services.AddControllers().AddFluentValidation(fv =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<UserRepository, UserRepositoryImp>();
-builder.Services.AddTransient<AuthenticationService, AuthenticationServiceImp>();
-builder.Services.AddTransient<UserService, UserServiceImp>();
+builder.Services.Scan(scan => scan
+                .FromAssembliesOf(typeof(Repository<>))
+                .AddClasses(publicOnly: true)
+                .AsMatchingInterface((repository, filter) =>
+                    filter.Where(implementation => implementation.Name.Equals($"I{repository.Name}", StringComparison.OrdinalIgnoreCase)))
+                .WithTransientLifetime());
+
+builder.Services.Scan(scan => scan
+                .FromAssemblyOf<IService>()
+                .AddClasses(publicOnly: true)
+                .AsMatchingInterface((service, filter) =>
+                    filter.Where(implementation => implementation.Name.Equals($"I{service.Name}", StringComparison.OrdinalIgnoreCase)))
+                .WithTransientLifetime());
 
 builder.Services.AddTransient<IValidator<UserCreateDTO>, UserCreateValidator>();
 
@@ -73,6 +84,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 MapperConfiguration mapperConfig = new MapperConfiguration(mc =>
 {
     mc.AddProfile(new UserMappingProfile());
+    mc.AddProfile(new AnswerMappingProfile());
+    mc.AddProfile(new QuestionMappingProfile());
+    mc.AddProfile(new PollMappingProfile());
 });
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);

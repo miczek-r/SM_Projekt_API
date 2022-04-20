@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Base
 {
-    public class RepositoryImp<T> : Repository<T> where T : class
+    public class Repository<T> : Core.Repositories.Base.IRepository<T> where T : class
     {
         protected readonly Data.IdentityDbContext _dbContext;
 
-        public RepositoryImp(Data.IdentityDbContext dbContext)
+        public Repository(Data.IdentityDbContext dbContext)
         {
             _dbContext = dbContext;
         }

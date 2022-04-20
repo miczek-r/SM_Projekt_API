@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class UserServiceImp : UserService
+    public class UserService : IUserService
     {
         private readonly IMapper _mapper;
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _userManager;
 
-        public UserServiceImp(IMapper mapper, UserRepository userRepository, UserManager<User> userManager)
+        public UserService(IMapper mapper, IUserRepository userRepository, UserManager<User> userManager)
         {
             _mapper = mapper;
             _userRepository = userRepository;
