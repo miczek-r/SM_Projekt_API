@@ -28,9 +28,9 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(PollBaseDTO poll)
+        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(PollCreateDTO poll)
         {
-
+            return Ok(await _pollService.Update(poll));
         }
 
         [HttpPut("activate/{id}")]
