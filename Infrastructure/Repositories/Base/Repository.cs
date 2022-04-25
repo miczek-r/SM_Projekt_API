@@ -1,4 +1,5 @@
 ﻿using Core.Repositories.Base;
+using Core.Specifications.Base;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -37,15 +38,36 @@ namespace Infrastructure.Repositories.Base
         {
             return await _dbContext.Set<T>().ToListAsync();
         }
-
-        public async Task<T> GetByIdAsync(int id)
+        public virtual async Task<T> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
 
-        public async Task<T> GetByLambdaAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> GetBySpecAsync(ISpecification<T> spec)
         {
-            return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
+            IQueryable<T> queryableResultWithIncludes = spec.Includes
+                  .Aggregate(_dbContext.Set<T>().AsQueryable(),
+                      (current, include) => current.Include(include));
+
+            IQueryable<T> secondaryResult = spec.IncludeStrings
+                .Aggregate(queryableResultWithIncludes,
+                    (current, include) => current.Include(include));
+
+            if (spec.IgnoreQueryFilter)
+            {
+                return await secondaryResult
+                            .IgnoreQueryFilters()
+                            .Where(spec.Criteria)
+                            .SingleOrDefaultAsync();
+            }
+            return await secondaryResult
+                            .Where(spec.Criteria)
+                            .SingleOrDefaultAsync();
+        }
+
+        public async Task<IReadOnlyList<T>> GetByLambdaAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
         }
 
         public async Task UpdateAsync(T entity)

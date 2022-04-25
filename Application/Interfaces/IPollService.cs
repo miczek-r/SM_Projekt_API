@@ -10,8 +10,8 @@ namespace Application.Interfaces
     public interface IPollService
     {
         Task<IEnumerable<PollLiteDTO>> GetAll();
-        Task<PollBaseDTO> Get(int id);
-        Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO);
+        Task<PollBaseDTO> Get(int id, bool isAnonymous);
+        Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id);
         Task Delete(int id);
         Task<int> Create(PollCreateDTO pollCreateDTO);
         Task Activate(int id);

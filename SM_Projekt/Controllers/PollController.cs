@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Poll;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SM_Projekt.Controllers
@@ -24,13 +25,14 @@ namespace SM_Projekt.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Get(int id)
         {
-            return Ok(await _pollService.Get(id));
+            bool isAnonymous = HttpContext.User?.Identity?.Name is null;
+            return Ok(await _pollService.Get(id,isAnonymous));
         }
 
-        [HttpPut]
-        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(PollCreateDTO poll)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(int id, PollCreateDTO poll)
         {
-            return Ok(await _pollService.Update(poll));
+            return Ok(await _pollService.Update(poll,id));
         }
 
         [HttpPut("activate/{id}")]
@@ -51,7 +53,7 @@ namespace SM_Projekt.Controllers
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
             int id = await _pollService.Create(pollCreateDTO);
-            PollBaseDTO poll = await _pollService.Get(id);
+            PollBaseDTO poll = await _pollService.Get(id, false);
             return CreatedAtAction(nameof(UserController.Get), new { id = id }, poll);
         }
 

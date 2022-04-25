@@ -26,6 +26,9 @@ namespace SM_Projekt.Helpers
 
                 switch (ex)
                 {
+                    case AccessForbiddenException e:
+                        response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        break;
                     case ObjectAlreadyExistsException e:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;

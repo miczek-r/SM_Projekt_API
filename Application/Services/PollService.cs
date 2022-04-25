@@ -4,9 +4,12 @@ using Application.Interfaces;
 using AutoMapper;
 using Core.Entities;
 using Core.Repositories;
+using Core.Specifications;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,11 +31,11 @@ namespace Application.Services
             Poll poll = await _pollService.GetByIdAsync(id);
             if(poll is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
             }
             if(poll.ExpirationDate<= DateTime.Now)
             {
-                throw new ObjectValidationException();
+                throw new ObjectValidationException("This poll cannot be activated because expiration date must be future");
             }
             poll.IsActive = true;
             await _pollService.UpdateAsync(poll);
@@ -51,17 +54,21 @@ namespace Application.Services
             Poll pollToDelete = await _pollService.GetByIdAsync(id);
             if(pollToDelete is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
             }
             await _pollService.DeleteAsync(pollToDelete);
         }
 
-        public async Task<PollBaseDTO> Get(int id)
+        public async Task<PollBaseDTO> Get(int id, bool isAnonymous)
         {   
-            Poll poll = await _pollService.GetByIdAsync(id);
+            Poll poll = await _pollService.GetBySpecAsync(new PollSpecification(x=>x.Id == id));
             if(poll is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
+            }
+            if(isAnonymous && !poll.AllowAnonymous)
+            {
+                throw new AccessForbiddenException("You are not allowed to join this poll");
             }
             PollBaseDTO result = _mapper.Map<PollBaseDTO>(poll);
             return result;
@@ -74,9 +81,20 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO)
+        public async Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id)
         {
-            throw new NotImplementedException();
+            Poll poll = await _pollService.GetByIdAsync(id);
+            if (poll is null)
+            {
+                throw new ObjectNotFoundException();
+            }
+            poll.AllowAnonymous = pollCreateDTO.AllowAnonymous;
+            poll.IsActive = pollCreateDTO.IsActive;
+            poll.ExpirationDate = pollCreateDTO.ExpirationDate;
+            poll.Questions = _mapper.Map<List<Question>>(pollCreateDTO.Questions);
+            await _pollService.UpdateAsync(poll);
+            var result = _mapper.Map<PollLiteDTO>(poll);
+            return result;
         }
     }
 }

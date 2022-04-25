@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Specifications.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,7 +12,8 @@ namespace Core.Repositories.Base
     {
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<T> GetByIdAsync(int id);
-        Task<T> GetByLambdaAsync(Expression<Func<T, bool>> predicate);
+        Task<IReadOnlyList<T>> GetByLambdaAsync(Expression<Func<T, bool>> predicate);
+        Task<T> GetBySpecAsync(ISpecification<T> spec);
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

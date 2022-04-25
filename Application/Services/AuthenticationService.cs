@@ -14,6 +14,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using Application.Exceptions;
+using System.Security.Principal;
 
 namespace Application.Services
 {
@@ -34,7 +35,7 @@ namespace Application.Services
 
         public async Task<LoginResponseDTO> Login(LoginDTO model)
         {
-            User user = await _userRepository.GetByLambdaAsync(user => user.UserName == model.Username);
+            User user = (await _userRepository.GetByLambdaAsync(user => user.UserName == model.Username)).First();
             if (user == null)
             {
                 throw new ObjectNotFoundException("User with this combination of username and password does not exist");
@@ -43,21 +44,8 @@ namespace Application.Services
             loginResult = await _signInManager.PasswordSignInAsync(user, model.Password, false, true);
             if (loginResult.Succeeded)
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                var authClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
-
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var token = GetToken(authClaims);
-
-                return new LoginResponseDTO(token);
+                TokenInfoDTO tokenInfo = await GenerateToken(user);
+                return new LoginResponseDTO(tokenInfo);
             }
             throw new ObjectNotFoundException("User with this combination of username and password does not exist");
         }
@@ -67,19 +55,26 @@ namespace Application.Services
             throw new NotImplementedException();
         }
 
-        private TokenInfoDTO GetToken(List<Claim> authClaims)
+        private async Task<TokenInfoDTO> GenerateToken(User user)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+            await _userManager.RemoveAuthenticationTokenAsync(user, "loginProviderName", "JwtToken");
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.ASCII.GetBytes(_configuration["JWT:Secret"]);
+            IList<Claim> claims = await _userManager.GetClaimsAsync(user);
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Email));
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(new GenericIdentity(user.UserName, "Token"), claims);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = claimsIdentity,
+                Expires = DateTime.UtcNow.AddDays(31),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string jwtToken = tokenHandler.WriteToken(token);
+            await _userManager.SetAuthenticationTokenAsync(user, "loginProviderName", "JwtToken", jwtToken);
+            return new TokenInfoDTO { Token = jwtToken, TokenValidUntil = tokenDescriptor.Expires.Value };
 
-            var token = new JwtSecurityToken(
-                //issuer: _configuration["JWT:ValidIssuer"],
-                //audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            return new TokenInfoDTO { Token = token.EncodedPayload, TokenValidUntil = token.ValidTo };
         }
 
 

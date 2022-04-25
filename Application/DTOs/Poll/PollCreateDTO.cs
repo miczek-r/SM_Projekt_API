@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Question;
+using Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Application.DTOs.Poll
     {
         public bool AllowAnonymous { get; set; }
         public bool IsActive { get; set; }
+        public PollType PollType { get; set; }
         public DateTime ExpirationDate { get; set; }
         public virtual ICollection<QuestionCreateDTO>? Questions { get; set; }
     }

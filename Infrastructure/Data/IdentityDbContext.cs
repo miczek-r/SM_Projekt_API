@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +17,13 @@ namespace Infrastructure.Data
         public DbSet<Poll> Polls { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
-        public DbSet<UserQuestionAnswer> UserQuestionAnswers { get; set; }
+        public DbSet<Vote> Votes { get; set; }
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options)
         {
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<UserQuestionAnswer>().HasKey(x => new
-            {
-                x.UserId, x.QuestionId, x.AnswerId
-            });
         }
     }
 }
