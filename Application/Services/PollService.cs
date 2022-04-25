@@ -42,9 +42,10 @@ namespace Application.Services
 
         }
 
-        public async Task<int> Create(PollCreateDTO pollCreateDTO)
+        public async Task<int> Create(PollCreateDTO pollCreateDTO, string? userId)
         {
             Poll newPoll = _mapper.Map<Poll>(pollCreateDTO);
+            newPoll.CreatedBy = userId;
             await _pollService.AddAsync(newPoll);
             return newPoll.Id;
         }
