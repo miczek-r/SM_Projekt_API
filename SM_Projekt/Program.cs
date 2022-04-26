@@ -85,9 +85,9 @@ builder.Services.AddTransient<IValidator<UserCreateDTO>, UserCreateValidator>();
 
 builder.Services.AddDbContext<IdentityDbContext>(options =>
 options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Configuration.GetConnectionString("RemoteConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<IdentityDbContext>()
     .AddDefaultTokenProviders();
 
