@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace SM_Projekt.Controllers
 {
@@ -52,7 +53,15 @@ namespace SM_Projekt.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
-            int id = await _pollService.Create(pollCreateDTO);
+            var identity = (ClaimsIdentity?)HttpContext.User.Identity;
+            string? userId = null;
+            if (identity is not null && identity.IsAuthenticated)
+            {
+                userId = identity.Claims?.FirstOrDefault(
+                    x => x.Type.Contains("nameidentifier")
+                    ).Value;
+            }
+            int id = await _pollService.Create(pollCreateDTO, userId);
             PollBaseDTO poll = await _pollService.Get(id, false);
             return CreatedAtAction(nameof(UserController.Get), new { id = id }, poll);
         }

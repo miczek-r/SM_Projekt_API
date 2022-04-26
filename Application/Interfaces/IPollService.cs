@@ -13,7 +13,7 @@ namespace Application.Interfaces
         Task<PollBaseDTO> Get(int id, bool isAnonymous);
         Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id);
         Task Delete(int id);
-        Task<int> Create(PollCreateDTO pollCreateDTO);
+        Task<int> Create(PollCreateDTO pollCreateDTO, string? userId);
         Task Activate(int id);
     }
 }
