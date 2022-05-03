@@ -17,7 +17,6 @@ namespace Infrastructure.Migrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
@@ -442,7 +441,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Answers");
                 });
-#pragma warning restore 612, 618
         }
     }
 }

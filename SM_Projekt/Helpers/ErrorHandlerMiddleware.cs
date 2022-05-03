@@ -23,26 +23,14 @@ namespace SM_Projekt.Helpers
             {
                 var response = context.Response;
                 response.ContentType = "application/json";
-
-                switch (ex)
+                response.StatusCode = ex switch
                 {
-                    case AccessForbiddenException e:
-                        response.StatusCode = (int)HttpStatusCode.Forbidden;
-                        break;
-                    case ObjectAlreadyExistsException e:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        break;
-                    case ObjectNotFoundException e:
-                        response.StatusCode = (int)HttpStatusCode.NotFound;
-                        break;
-                    case ObjectValidationException e:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        break;
-                    default:
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        break;
-                }
-
+                    AccessForbiddenException => (int)HttpStatusCode.Forbidden,
+                    ObjectAlreadyExistsException  => (int)HttpStatusCode.BadRequest,
+                    ObjectNotFoundException  => (int)HttpStatusCode.NotFound,
+                    ObjectValidationException  => (int)HttpStatusCode.BadRequest,
+                    _ => (int)HttpStatusCode.InternalServerError,
+                };
                 var result = JsonSerializer.Serialize(new { message = ex?.Message });
                 await response.WriteAsync(result);
             }

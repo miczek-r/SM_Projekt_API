@@ -63,12 +63,55 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PollType")
                         .HasColumnType("int");
+
+                    b.Property<bool>("ResultsArePublic")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Polls");
+                });
+
+            modelBuilder.Entity("Core.Entities.PollAllowed", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("UserId", "PollId");
+
+                    b.HasIndex("PollId");
+
+                    b.ToTable("PollAllowed");
+                });
+
+            modelBuilder.Entity("Core.Entities.PollModerators", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("UserId", "PollId");
+
+                    b.HasIndex("PollId");
+
+                    b.ToTable("PollModerators");
                 });
 
             modelBuilder.Entity("Core.Entities.Question", b =>
@@ -82,7 +125,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PollId")
+                    b.Property<int>("PollId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -146,9 +189,6 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PollId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -168,8 +208,6 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("PollId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -200,6 +238,21 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Votes");
+                });
+
+            modelBuilder.Entity("Core.Entities.VotingToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("PollId");
+
+                    b.ToTable("VotingTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -342,18 +395,53 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("QuestionId");
                 });
 
-            modelBuilder.Entity("Core.Entities.Question", b =>
+            modelBuilder.Entity("Core.Entities.PollAllowed", b =>
                 {
-                    b.HasOne("Core.Entities.Poll", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("PollId");
+                    b.HasOne("Core.Entities.Poll", "Poll")
+                        .WithMany("AllowedUsers")
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Poll");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Core.Entities.User", b =>
+            modelBuilder.Entity("Core.Entities.PollModerators", b =>
                 {
-                    b.HasOne("Core.Entities.Poll", null)
-                        .WithMany("AllowedUsers")
-                        .HasForeignKey("PollId");
+                    b.HasOne("Core.Entities.Poll", "Poll")
+                        .WithMany("Moderators")
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Poll");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.Question", b =>
+                {
+                    b.HasOne("Core.Entities.Poll", "Poll")
+                        .WithMany("Questions")
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Poll");
                 });
 
             modelBuilder.Entity("Core.Entities.Vote", b =>
@@ -379,6 +467,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Question");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.VotingToken", b =>
+                {
+                    b.HasOne("Core.Entities.Poll", null)
+                        .WithMany("VotingTokens")
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -436,7 +533,11 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("AllowedUsers");
 
+                    b.Navigation("Moderators");
+
                     b.Navigation("Questions");
+
+                    b.Navigation("VotingTokens");
                 });
 
             modelBuilder.Entity("Core.Entities.Question", b =>

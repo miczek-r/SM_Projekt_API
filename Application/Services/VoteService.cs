@@ -35,11 +35,11 @@ namespace Application.Services
             {
                 throw new ObjectNotFoundException("This poll does not exist");
             }
-            if (poll.PollType == PollType.Private && poll.CreatedBy != userId)
+            if (!poll.ResultsArePublic && poll.CreatedBy != userId && !(poll.Moderators?.Any(x => x.UserId == userId) ?? false))
             {
                 throw new AccessForbiddenException("You are not allowed to view this poll results");
             }
-            List<Vote> votes = new List<Vote>();
+            List<Vote> votes = new();
             ICollection<VoteQuestionInfoDTO> voteQuestions = new List<VoteQuestionInfoDTO>();
             foreach (var question in poll.Questions)
             {
@@ -53,29 +53,33 @@ namespace Application.Services
                 voteQuestions.Add(test);
             }
 
-        ICollection<VoteBaseDTO> baseAnswers = _mapper.Map<ICollection<VoteBaseDTO>>(votes);
-            return new VoteInfoDTO { BaseAnswers = baseAnswers, VoteQuestions = voteQuestions};
-}
+            ICollection<VoteBaseDTO> baseAnswers = _mapper.Map<ICollection<VoteBaseDTO>>(votes);
+            return new VoteInfoDTO { BaseAnswers = baseAnswers, VoteQuestions = voteQuestions };
+        }
 
-public async Task Vote(VoteCreateDTO vote, string userId)
-{
-    Vote newVote = _mapper.Map<Vote>(vote);
-    newVote.UserId = userId;
-    await _voteRepository.AddAsync(newVote);
-}
+        public async Task VoteSingle(VoteCreateDTO vote, string userId)
+        {
+            //TODO: If not allowed to vote in this poll throw error
+            await Vote(vote, userId);
+        }
 
-public async Task VoteAggregate(VoteAggregateDTO votes, string userId)
-{
-    if (votes.Votes is null)
-    {
-        throw new ObjectValidationException("There are no votes");
-    }
-    foreach (var vote in votes.Votes)
-    {
-        Vote newVote = _mapper.Map<Vote>(vote);
-        newVote.UserId = userId;
-        await _voteRepository.AddAsync(newVote);
-    }
-}
+        public async Task VoteAggregate(VoteAggregateDTO votes, string userId)
+        {
+            if (votes.Votes is null)
+            {
+                throw new ObjectValidationException("There are no votes");
+            }
+            foreach (var vote in votes.Votes)
+            {
+                await Vote(vote, userId);
+            }
+        }
+        private async Task Vote(VoteCreateDTO vote, string userId)
+        {
+
+            Vote newVote = _mapper.Map<Vote>(vote);
+            newVote.UserId = userId;
+            await _voteRepository.AddAsync(newVote);
+        }
     }
 }

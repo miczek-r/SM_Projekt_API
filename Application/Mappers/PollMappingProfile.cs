@@ -13,7 +13,11 @@ namespace Application.Mappers
     {
         public PollMappingProfile()
         {
-            CreateMap<PollCreateDTO, Poll>().PreserveReferences();
+            CreateMap<PollCreateDTO, Poll>()
+                .ForMember(dest => dest.AllowedUsers,
+                opt => opt.MapFrom(
+                    source=> source.AllowedUsersIds.Select(id => new PollAllowed { UserId = id})))
+                .PreserveReferences();
             CreateMap<Poll, PollBaseDTO>().PreserveReferences();
             CreateMap<Poll, PollLiteDTO>().PreserveReferences();
         }

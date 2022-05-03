@@ -27,7 +27,7 @@ namespace SM_Projekt.Controllers
         public async Task<ActionResult> Vote(VoteCreateDTO voteBaseDTO)
         {
             string? userId = GetUserInfo();
-            await _voteService.Vote(voteBaseDTO, userId);
+            await _voteService.VoteSingle(voteBaseDTO, userId);
             return Ok();
         }
 

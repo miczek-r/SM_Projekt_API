@@ -30,8 +30,7 @@ namespace UnitTests
         [Fact]
         public async Task ShouldCreateUser()
         {
-            UserCreateDTO userCreateDTO = new UserCreateDTO();
-            userCreateDTO.Username = Internet.UserName();
+            UserCreateDTO userCreateDTO = new ();
             userCreateDTO.Email = Internet.Email();
             userCreateDTO.Password = "!Admin123";
             var response = await _client.PostAsJsonAsync("/api/user", userCreateDTO);
@@ -40,7 +39,6 @@ namespace UnitTests
            
             user.Should().NotBeNull();
             user.Email.Should().Be(userCreateDTO.Email);
-            user.Username.Should().Be(userCreateDTO.Username);
 
         }
 

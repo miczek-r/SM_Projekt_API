@@ -12,11 +12,12 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20220425152444_ChangedTableName")]
-    partial class ChangedTableName
+    [Migration("20220501131823_Changes")]
+    partial class Changes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
+#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
@@ -64,8 +65,17 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PollType")
                         .HasColumnType("int");
+
+                    b.Property<bool>("ResultsArePublic")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -150,6 +160,9 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("PollId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PollId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -172,6 +185,8 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PollId");
 
+                    b.HasIndex("PollId1");
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -190,7 +205,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -356,6 +370,10 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Entities.Poll", null)
                         .WithMany("AllowedUsers")
                         .HasForeignKey("PollId");
+
+                    b.HasOne("Core.Entities.Poll", null)
+                        .WithMany("Moderators")
+                        .HasForeignKey("PollId1");
                 });
 
             modelBuilder.Entity("Core.Entities.Vote", b =>
@@ -374,9 +392,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Answer");
 
@@ -440,6 +456,8 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("AllowedUsers");
 
+                    b.Navigation("Moderators");
+
                     b.Navigation("Questions");
                 });
 
@@ -447,6 +465,7 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Answers");
                 });
+#pragma warning restore 612, 618
         }
     }
 }

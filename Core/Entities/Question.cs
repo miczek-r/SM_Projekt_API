@@ -14,5 +14,7 @@ namespace Core.Entities
         public string? Description { get; set; }
         public QuestionType Type { get; set; }
         public virtual ICollection<Answer>? Answers { get; set; }
+        public Poll Poll { get; set; }
+        public int PollId { get; set; }
     }
 }

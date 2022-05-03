@@ -35,7 +35,7 @@ namespace Application.Services
 
         public async Task<LoginResponseDTO> Login(LoginDTO model)
         {
-            User user = (await _userRepository.GetByLambdaAsync(user => user.UserName == model.Username)).First();
+            User user = (await _userRepository.GetByLambdaAsync(user => user.Email == model.Email)).First();
             if (user == null)
             {
                 throw new ObjectNotFoundException("User with this combination of username and password does not exist");

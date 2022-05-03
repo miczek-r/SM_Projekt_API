@@ -26,8 +26,7 @@ namespace SM_Projekt.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Get(int id)
         {
-            bool isAnonymous = HttpContext.User?.Identity?.Name is null;
-            return Ok(await _pollService.Get(id,isAnonymous));
+            return Ok(await _pollService.Get(id));
         }
 
         [HttpPut("{id}")]
@@ -53,17 +52,10 @@ namespace SM_Projekt.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
-            var identity = (ClaimsIdentity?)HttpContext.User.Identity;
-            string? userId = null;
-            if (identity is not null && identity.IsAuthenticated)
-            {
-                userId = identity.Claims?.FirstOrDefault(
-                    x => x.Type.Contains("nameidentifier")
-                    ).Value;
-            }
-            int id = await _pollService.Create(pollCreateDTO, userId);
-            PollBaseDTO poll = await _pollService.Get(id, false);
-            return CreatedAtAction(nameof(UserController.Get), new { id = id }, poll);
+            
+            int id = await _pollService.Create(pollCreateDTO);
+            PollBaseDTO poll = await _pollService.Get(id);
+            return CreatedAtAction(nameof(UserController.Get), new { id }, poll);
         }
 
     }

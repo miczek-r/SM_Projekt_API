@@ -62,7 +62,7 @@ builder.Services.AddSwaggerGen(c =>
                 Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
@@ -81,13 +81,17 @@ builder.Services.Scan(scan => scan
                     filter.Where(implementation => implementation.Name.Equals($"I{service.Name}", StringComparison.OrdinalIgnoreCase)))
                 .WithTransientLifetime());
 
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+
 builder.Services.AddTransient<IValidator<UserCreateDTO>, UserCreateValidator>();
 
 builder.Services.AddDbContext<IdentityDbContext>(options =>
 options.UseSqlServer(
     builder.Configuration.GetConnectionString("RemoteConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<IdentityDbContext>()
     .AddDefaultTokenProviders();
 
@@ -109,7 +113,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     // User settings.
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = false;
+    options.User.RequireUniqueEmail = true;
 });
 
 var Key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]);
@@ -132,7 +136,7 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
-MapperConfiguration mapperConfig = new MapperConfiguration(mc =>
+MapperConfiguration mapperConfig = new (mc =>
 {
     mc.AddProfile(new UserMappingProfile());
     mc.AddProfile(new AnswerMappingProfile());

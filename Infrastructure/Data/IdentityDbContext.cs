@@ -13,17 +13,30 @@ namespace Infrastructure.Data
 {
     public class IdentityDbContext : IdentityDbContext<User, IdentityRole, string>
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<Poll> Polls { get; set; }
-        public DbSet<Question> Questions { get; set; }
-        public DbSet<Answer> Answers { get; set; }
-        public DbSet<Vote> Votes { get; set; }
+        override public DbSet<User> Users => Set<User>();
+        public DbSet<Poll> Polls => Set<Poll>();
+        public DbSet<Question> Questions => Set<Question>();
+        public DbSet<Answer> Answers => Set<Answer>();
+        public DbSet<Vote> Votes => Set<Vote>();
+        public DbSet<PollAllowed> PollAllowed => Set<PollAllowed>();
+        public DbSet<PollModerators> PollModerators => Set<PollModerators>();
+        public DbSet<VotingToken> VotingTokens => Set<VotingToken>();
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options)
         {
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<PollAllowed>().HasKey(x => new
+            {
+                x.UserId,
+                x.PollId,
+            });
+            builder.Entity<PollModerators>().HasKey(x => new
+            {
+                x.UserId,
+                x.PollId,
+            });
         }
     }
 }

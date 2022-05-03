@@ -10,6 +10,7 @@ namespace Core.Enums
     {
         Private,
         Public,
+        Protected,
         Hidden
     }
 }

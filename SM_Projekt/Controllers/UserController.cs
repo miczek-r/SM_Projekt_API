@@ -1,5 +1,6 @@
 ﻿using Application.DTO;
 using Application.DTO.User;
+using Application.DTOs.User;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,12 +20,12 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserBaseDTO>>> GetAll(){
+        public async Task<ActionResult<IEnumerable<UserBaseDTO>>> GetAll() {
             return Ok(await _userService.GetAll());
-            }
+        }
 
-       [HttpGet("{id}")]
-       public async Task<ActionResult<UserBaseDTO>> Get(string id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserBaseDTO>> Get(string id)
         {
             return Ok(await _userService.Get(id));
         }
@@ -35,7 +36,14 @@ namespace SM_Projekt.Controllers
         {
             string id = await _userService.Create(registerDTO);
             UserBaseDTO user = await _userService.Get(id);
-            return CreatedAtAction(nameof(UserController.Get), new { id = id }, user);
+            return CreatedAtAction(nameof(UserController.Get), new { id }, user);
+        }
+
+        [HttpPost("ConfirmMail")]
+        public async Task<ActionResult> ConfirmMail([FromBody] EmailConfirmationDTO confirmationDTO)
+        {
+            await _userService.ConfirmEmail(confirmationDTO);
+            return Ok();
         }
     }
 }
