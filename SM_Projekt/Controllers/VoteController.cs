@@ -19,37 +19,21 @@ namespace SM_Projekt.Controllers
         [HttpGet("{pollId}")]
         public async Task<ActionResult<VoteInfoDTO>> Get(int pollId)
         {
-            string? userId = GetUserInfo();
-            return Ok(await _voteService.Get(pollId, userId));
+            return Ok(await _voteService.Get(pollId));
         }
 
         [HttpPost]
         public async Task<ActionResult> Vote(VoteCreateDTO voteBaseDTO)
         {
-            string? userId = GetUserInfo();
-            await _voteService.VoteSingle(voteBaseDTO, userId);
+            await _voteService.VoteSingle(voteBaseDTO);
             return Ok();
         }
 
         [HttpPost("Aggregate")]
         public async Task<ActionResult> VoteAggregate(VoteAggregateDTO voteAggregateDTO)
         {
-            string? userId = GetUserInfo();
-            await _voteService.VoteAggregate(voteAggregateDTO, userId);
+            await _voteService.VoteAggregate(voteAggregateDTO);
             return Ok();
-        }
-        private string? GetUserInfo()
-        {
-            var identity = (ClaimsIdentity?)HttpContext.User.Identity;
-            string? userId = null;
-            if (identity is not null && identity.IsAuthenticated)
-            {
-                userId = identity.Claims?.FirstOrDefault(
-                    x => x.Type.Contains("nameidentifier")
-                    ).Value;
-            }
-
-            return userId;
         }
     }
 }

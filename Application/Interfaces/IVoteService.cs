@@ -9,8 +9,8 @@ namespace Application.Interfaces
 {
     public interface IVoteService
     {
-        Task VoteSingle(VoteCreateDTO vote, string userId);
-        Task VoteAggregate(VoteAggregateDTO votes, string userId);
-        Task<VoteInfoDTO> Get(int pollId, string userId);
+        Task VoteSingle(VoteCreateDTO vote);
+        Task VoteAggregate(VoteAggregateDTO votes);
+        Task<VoteInfoDTO> Get(int pollId);
     }
 }
