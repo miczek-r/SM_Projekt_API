@@ -4,8 +4,11 @@ using SM_Projekt.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT");
-builder.WebHost.UseUrls("http://*:" + port);
+if (!builder.Environment.IsDevelopment())
+{
+    var port = Environment.GetEnvironmentVariable("PORT");
+    builder.WebHost.UseUrls("http://*:" + port);
+}
 
 builder.Services.RegisterValidators();
 builder.Services.AddEndpointsApiExplorer();
