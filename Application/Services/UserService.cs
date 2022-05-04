@@ -77,7 +77,7 @@ namespace Application.Services
                 throw new ObjectValidationException(errors);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await _mailService.SendEmailAsync(user.Email, "Confirm email", token);
+            await _mailService.SendEmailAsync(user.Email, $"Projekt z Sm: Potwierdź mail {user.Email}", token);
             return user.Id;
 
         }

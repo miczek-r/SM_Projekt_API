@@ -132,6 +132,18 @@ namespace Application.Services
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }
+        public async Task<IEnumerable<PollLiteDTO>> GetMyPolls()
+        {
+            string? userId = GetCurrentUserId();
+            if(userId is null)
+            {
+                throw new AccessForbiddenException("You must be logged in");
+            }
+            IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
+            poll = poll.Where(x=> x.Moderators.Any(y=>y.UserId==userId) || x.CreatedBy == userId);
+            IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
+            return result;
+        }
 
         /*public async Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id)
         {

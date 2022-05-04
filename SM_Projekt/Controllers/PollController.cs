@@ -29,6 +29,12 @@ namespace SM_Projekt.Controllers
             return Ok(await _pollService.Get(id));
         }
 
+        [HttpGet("MyPolls")]
+        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetMyPolls()
+        {
+            return Ok(await _pollService.GetMyPolls());
+        }
+
         /*[HttpPut("{id}")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(int id, PollCreateDTO poll)
         {
