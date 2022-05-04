@@ -27,15 +27,17 @@ namespace UnitTests
 
         private static List<User> GetSeedingUsers()
         {
-            List<User> users = new List<User>();
+            List<User> users = new();
             for(int i = 0; i < 50; i++)
             {
-                var user = new User();
-                user.Id = $"{i}";
-                user.FirstName = Name.First();
-                user.LastName = Name.Last();
+                var user = new User
+                {
+                    Id = $"{i}",
+                    FirstName = Name.First(),
+                    LastName = Name.Last()
+                };
                 user.Email = Internet.Email($"{user.FirstName} {user.LastName}");
-                user.UserName = Internet.UserName($"{user.FirstName} {user.LastName}");
+                user.UserName = user.Email;
                 users.Add(user);
             }
             return users;   
