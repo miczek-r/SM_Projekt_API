@@ -140,7 +140,7 @@ namespace Application.Services
                 throw new AccessForbiddenException("You must be logged in");
             }
             IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
-            poll = poll.Where(x=> x.Moderators.Any(y=>y.UserId==userId) || x.CreatedBy == userId);
+            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y=>y.UserId == userId)??false));
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }

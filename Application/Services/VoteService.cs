@@ -48,7 +48,9 @@ namespace Application.Services
                 var test = new VoteQuestionInfoDTO
                 {
                     QuestionId = question.Id,
-                    Answers = votesInQuestion.GroupBy(x => x.Answer).Select(group => new VoteAnswerInfoDTO { AnswerId = group.Key.Id, Count = group.Count() }).ToList()
+                    QuestionText = question.Text,
+                    QuestionType = question.Type,
+                    Answers = votesInQuestion.GroupBy(x => x.Answer).Select(group => new VoteAnswerInfoDTO { AnswerId = group.Key.Id, AnswerText = group.Key.Text ,Count = group.Count() }).ToList()
                 };
                 voteQuestions.Add(test);
             }
