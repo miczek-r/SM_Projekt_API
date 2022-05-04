@@ -56,8 +56,14 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AllowAnonymous = table.Column<bool>(type: "bit", nullable: false)
+                    AllowAnonymous = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    ResultsArePublic = table.Column<bool>(type: "bit", nullable: false),
+                    PollType = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -171,15 +177,63 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PollAllowed",
+                columns: table => new
+                {
+                    PollId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PollAllowed", x => new { x.UserId, x.PollId });
+                    table.ForeignKey(
+                        name: "FK_PollAllowed_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PollAllowed_Polls_PollId",
+                        column: x => x.PollId,
+                        principalTable: "Polls",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PollModerators",
+                columns: table => new
+                {
+                    PollId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PollModerators", x => new { x.UserId, x.PollId });
+                    table.ForeignKey(
+                        name: "FK_PollModerators_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PollModerators_Polls_PollId",
+                        column: x => x.PollId,
+                        principalTable: "Polls",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    PollId = table.Column<int>(type: "int", nullable: true)
+                    PollId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -188,7 +242,26 @@ namespace Infrastructure.Migrations
                         name: "FK_Questions_Polls_PollId",
                         column: x => x.PollId,
                         principalTable: "Polls",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VotingTokens",
+                columns: table => new
+                {
+                    Token = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PollId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VotingTokens", x => x.Token);
+                    table.ForeignKey(
+                        name: "FK_VotingTokens_Polls_PollId",
+                        column: x => x.PollId,
+                        principalTable: "Polls",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -197,7 +270,7 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -211,30 +284,31 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserQuestionAnswers",
+                name: "Votes",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
                     AnswerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserQuestionAnswers", x => new { x.UserId, x.QuestionId, x.AnswerId });
+                    table.PrimaryKey("PK_Votes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserQuestionAnswers_Answers_AnswerId",
+                        name: "FK_Votes_Answers_AnswerId",
                         column: x => x.AnswerId,
                         principalTable: "Answers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserQuestionAnswers_AspNetUsers_UserId",
+                        name: "FK_Votes_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_UserQuestionAnswers_Questions_QuestionId",
+                        name: "FK_Votes_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
                         principalColumn: "Id",
@@ -286,19 +360,39 @@ namespace Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PollAllowed_PollId",
+                table: "PollAllowed",
+                column: "PollId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PollModerators_PollId",
+                table: "PollModerators",
+                column: "PollId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Questions_PollId",
                 table: "Questions",
                 column: "PollId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserQuestionAnswers_AnswerId",
-                table: "UserQuestionAnswers",
+                name: "IX_Votes_AnswerId",
+                table: "Votes",
                 column: "AnswerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserQuestionAnswers_QuestionId",
-                table: "UserQuestionAnswers",
+                name: "IX_Votes_QuestionId",
+                table: "Votes",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votes_UserId",
+                table: "Votes",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VotingTokens_PollId",
+                table: "VotingTokens",
+                column: "PollId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -319,7 +413,16 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UserQuestionAnswers");
+                name: "PollAllowed");
+
+            migrationBuilder.DropTable(
+                name: "PollModerators");
+
+            migrationBuilder.DropTable(
+                name: "Votes");
+
+            migrationBuilder.DropTable(
+                name: "VotingTokens");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
