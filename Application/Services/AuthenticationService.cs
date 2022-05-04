@@ -35,10 +35,14 @@ namespace Application.Services
 
         public async Task<LoginResponseDTO> Login(LoginDTO model)
         {
-            User user = (await _userRepository.GetByLambdaAsync(user => user.Email == model.Email)).First();
-            if (user == null)
+            User? user = (await _userRepository.GetByLambdaAsync(user => user.Email == model.Email)).FirstOrDefault();
+            if (user is null)
             {
                 throw new ObjectNotFoundException("User with this combination of username and password does not exist");
+            }
+            if (!user.EmailConfirmed)
+            {
+                throw new ObjectValidationException("User not activated. Confirm your email!");
             }
             SignInResult loginResult;
             loginResult = await _signInManager.PasswordSignInAsync(user, model.Password, false, true);

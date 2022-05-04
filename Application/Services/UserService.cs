@@ -41,7 +41,7 @@ namespace Application.Services
         public async Task<UserBaseDTO> Get(string id)
         {
             User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
+            if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");
             }
@@ -85,7 +85,7 @@ namespace Application.Services
         public async Task ConfirmEmail(EmailConfirmationDTO confirmationDTO)
         {
             var user = await _userManager.FindByEmailAsync(confirmationDTO.Email);
-            if (user == null)
+            if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");
             }
