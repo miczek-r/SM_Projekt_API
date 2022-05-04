@@ -30,7 +30,7 @@ namespace Application.Services
             _mailService = mailservice;
         }
 
-        public async Task Activate(int pollId)
+        public async Task OpenPoll(int pollId)
         {
             string? userId = GetCurrentUserId();
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
@@ -42,9 +42,13 @@ namespace Application.Services
             {
                 throw new AccessForbiddenException("You dont have permissions to activate this poll");
             }
-            if (poll.ExpirationDate<= DateTime.Now)
+            if (poll.EndDate <= DateTime.Now)
             {
                 throw new ObjectValidationException("This poll cannot be activated because expiration date must be future");
+            }
+            if(poll.IsActive == true)
+            {
+                throw new ObjectValidationException("This poll is already open");
             }
             poll.IsActive = true;
             await _pollRepository.UpdateAsync(poll);
@@ -64,7 +68,7 @@ namespace Application.Services
 
         }
 
-        public async Task Close(int pollId)
+        public async Task ClosePoll(int pollId)
         {
             string? userId = GetCurrentUserId();
             Poll poll = await _pollRepository.GetByIdAsync(pollId);
@@ -129,7 +133,7 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id)
+        /*public async Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id)
         {
             string? userId = GetCurrentUserId();
             Poll poll = await _pollRepository.GetByIdAsync(id);
@@ -142,13 +146,12 @@ namespace Application.Services
                 throw new AccessForbiddenException("You dont have permissions to modify this poll");
             }
             poll.AllowAnonymous = pollCreateDTO.AllowAnonymous;
-            poll.IsActive = pollCreateDTO.IsActive;
-            poll.ExpirationDate = pollCreateDTO.ExpirationDate;
+            poll.EndDate = pollCreateDTO.EndDate;
             poll.Questions = _mapper.Map<List<Question>>(pollCreateDTO.Questions);
             await _pollRepository.UpdateAsync(poll);
             var result = _mapper.Map<PollLiteDTO>(poll);
             return result;
-        }
+        }*/
 
         private string? GetCurrentUserId()
         {

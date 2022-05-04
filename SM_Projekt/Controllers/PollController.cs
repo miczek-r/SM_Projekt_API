@@ -29,16 +29,16 @@ namespace SM_Projekt.Controllers
             return Ok(await _pollService.Get(id));
         }
 
-        [HttpPut("{id}")]
+        /*[HttpPut("{id}")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(int id, PollCreateDTO poll)
         {
             return Ok(await _pollService.Update(poll,id));
-        }
+        }*/
 
         [HttpPut("activate/{id}")]
         public async Task<ActionResult> Activate(int id)
         {
-            await _pollService.Activate(id);
+            await _pollService.OpenPoll(id);
             return Ok();
         }
 

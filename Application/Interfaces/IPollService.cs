@@ -11,9 +11,9 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<PollLiteDTO>> GetAll();
         Task<PollBaseDTO> Get(int id);
-        Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id);
+        //Task<PollLiteDTO> Update(PollCreateDTO pollCreateDTO, int id);
         Task Delete(int id);
         Task<int> Create(PollCreateDTO pollCreateDTO);
-        Task Activate(int id);
+        Task OpenPoll(int id);
     }
 }

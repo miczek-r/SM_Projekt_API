@@ -11,6 +11,8 @@ namespace Core.Entities
 {
     public class Vote : BaseEntity
     {
+        public int PollId { get; set; }
+        public Poll Poll { get; set; }
         public string? UserId { get; set; }
         public User? User { get; set; }
         public int QuestionId { get; set; }
