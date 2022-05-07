@@ -15,6 +15,7 @@ namespace Infrastructure.Data
     {
         override public DbSet<User> Users => Set<User>();
         public DbSet<Poll> Polls => Set<Poll>();
+        public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<Question> Questions => Set<Question>();
         public DbSet<Answer> Answers => Set<Answer>();
         public DbSet<Vote> Votes => Set<Vote>();

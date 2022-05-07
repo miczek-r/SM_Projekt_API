@@ -17,6 +17,7 @@ namespace Core.Specifications
             AddInclude(x => x.AllowedUsers);
             AddInclude(x => x.Moderators);
             AddInclude(x => x.Questions);
+            AddInclude(x => x.VotingTokens);
             AddInclude($"{nameof(Poll.AllowedUsers)}.{nameof(PollAllowed.User)}");
             AddInclude($"{nameof(Poll.Moderators)}.{nameof(PollAllowed.User)}");
             AddInclude($"{nameof(Poll.Questions)}.{nameof(Question.Answers)}");

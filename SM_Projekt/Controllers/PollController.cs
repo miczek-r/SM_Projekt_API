@@ -23,10 +23,16 @@ namespace SM_Projekt.Controllers
             return Ok(await _pollService.GetAll());
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Get(int id)
+        [HttpGet("{pollId}")]
+        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Get(int pollId)
         {
-            return Ok(await _pollService.Get(id));
+            return Ok(await _pollService.Get(pollId));
+        }
+
+        [HttpGet("GetInfo/{pollId}")]
+        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetInfo(int pollId)
+        {
+            return Ok(await _pollService.GetInfo(pollId));
         }
 
         [HttpGet("MyPolls")]
@@ -41,31 +47,31 @@ namespace SM_Projekt.Controllers
             return Ok(await _pollService.Update(poll,id));
         }*/
 
-        [HttpPut("Activate/{id}")]
+        [HttpPut("Activate/{pollId}")]
         public async Task<ActionResult> Activate(int pollId)
         {
             await _pollService.OpenPoll(pollId);
             return Ok();
         }
 
-        [HttpPut("Invite/{id}")]
+        [HttpPut("Invite/{pollId}")]
         public async Task<ActionResult> InviteToPoll(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.InviteUsers(pollId, pollInviteDTO);
             return Ok();
         }
 
-        [HttpPut("AddModerators/{id}")]
+        [HttpPut("SetModerators/{pollId}")]
         public async Task<ActionResult> SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.SetPollModerators(pollId, pollInviteDTO);
             return Ok();
         }
 
-        [HttpDelete]
-        public async Task<ActionResult> Delete(int id)
+        [HttpDelete("{pollId}")]
+        public async Task<ActionResult> Delete(int pollId)
         {
-            await _pollService.Delete(id);
+            await _pollService.Delete(pollId);
             return Ok();
         }
 

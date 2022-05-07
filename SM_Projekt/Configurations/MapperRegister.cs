@@ -14,6 +14,7 @@ namespace SM_Projekt.Configurations
                 mc.AddProfile(new QuestionMappingProfile());
                 mc.AddProfile(new PollMappingProfile());
                 mc.AddProfile(new VoteMappingProfile());
+                mc.AddProfile(new NotificationMappingProfile());
             });
 
             IMapper mapper = mapperConfig.CreateMapper();

@@ -117,10 +117,10 @@ namespace Application.Services
             await _pollRepository.DeleteAsync(pollToDelete);
         }
 
-        public async Task<PollBaseDTO> Get(int id)
+        public async Task<PollBaseDTO> Get(int pollId)
         {
             bool isAnonymous = GetCurrentUserId() is null;
-            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == id));
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
                 throw new ObjectNotFoundException("This poll does not exist");
@@ -130,6 +130,22 @@ namespace Application.Services
                 throw new AccessForbiddenException("You are not allowed to join this poll");
             }
             PollBaseDTO result = _mapper.Map<PollBaseDTO>(poll);
+            return result;
+        }
+
+        public async Task<PollInfoDTO> GetInfo(int pollId)
+        {
+            string? userId = GetCurrentUserId();
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
+            if (poll is null)
+            {
+                throw new ObjectNotFoundException();
+            }
+            if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
+            {
+                throw new AccessForbiddenException("You dont have permissions to get this poll info");
+            }
+            PollInfoDTO result = _mapper.Map<PollInfoDTO>(poll);
             return result;
         }
 
@@ -176,7 +192,7 @@ namespace Application.Services
         public async Task InviteUsers(int pollId, PollInviteDTO pollInviteDTO)
         {
             string? userId = GetCurrentUserId();
-            Poll poll = await _pollRepository.GetByIdAsync(pollId);
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
                 throw new ObjectNotFoundException();
@@ -202,12 +218,13 @@ namespace Application.Services
                     }
                 }
             }
+            await _pollRepository.UpdateAsync(poll);
         }
 
         public async Task SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
         {
             string? userId = GetCurrentUserId();
-            Poll poll = await _pollRepository.GetByIdAsync(pollId);
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
                 throw new ObjectNotFoundException();
@@ -225,6 +242,7 @@ namespace Application.Services
                 if (user is null) continue;
                 poll.Moderators.Add(new PollModerator() { UserId = id, PollId = poll.Id });
             }
+            await _pollRepository.UpdateAsync(poll);
         }
         private string? GetCurrentUserId()
         {

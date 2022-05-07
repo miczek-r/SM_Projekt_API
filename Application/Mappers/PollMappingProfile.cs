@@ -23,6 +23,10 @@ namespace Application.Mappers
                 .PreserveReferences();
             CreateMap<Poll, PollBaseDTO>().PreserveReferences();
             CreateMap<Poll, PollLiteDTO>().PreserveReferences();
+            CreateMap<Poll, PollInfoDTO>().PreserveReferences()
+                .ForMember(dest => dest.Moderators, opt => opt.MapFrom(so => so.Moderators.Select(t => t.User).ToList()))
+                .ForMember(dest => dest.AllowedUsers, opt => opt.MapFrom(so => so.AllowedUsers.Select(t => t.User).ToList()))
+                .ForMember(dest => dest.VotingTokens, opt => opt.MapFrom(so => so.VotingTokens.Select(t => t.Token).ToList()));
         }
     }
 }
