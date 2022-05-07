@@ -32,7 +32,7 @@ namespace Application.Services
             email.Body = new TextPart(TextFormat.Plain) { Text = text };
 
             using var smtp = new SmtpClient();
-            smtp.Connect(_configuration["Mail:Host"], Int32.Parse(_configuration["Mail:Port"]), SecureSocketOptions.StartTls);
+            smtp.Connect(_configuration["Mail:Host"], Int32.Parse(_configuration["Mail:Port"]), SecureSocketOptions.Auto);
             smtp.Authenticate(_configuration["Mail:Email"], _configuration["Mail:Password"]);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);

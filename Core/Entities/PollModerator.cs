@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class PollModerators
+    public class PollModerator
     {
         [Key, Column(Order = 1)]
         public int PollId { get; set; }

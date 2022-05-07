@@ -6,6 +6,7 @@ using Core.Entities;
 using Core.Repositories;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,20 +22,22 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IMailService _mailService;
+        private readonly UserManager<User> _userManager;
 
-        public PollService(IPollRepository pollRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IMailService mailservice)
+        public PollService(IPollRepository pollRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IMailService mailservice, UserManager<User> userManager)
         {
             _pollRepository = pollRepository;
             _mapper = mapper;
             _contextAccessor = httpContextAccessor;
             _mailService = mailservice;
+            _userManager = userManager;
         }
 
         public async Task OpenPoll(int pollId)
         {
             string? userId = GetCurrentUserId();
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
-            if(poll is null)
+            if (poll is null)
             {
                 throw new ObjectNotFoundException("This poll does not exist");
             }
@@ -46,26 +49,31 @@ namespace Application.Services
             {
                 throw new ObjectValidationException("This poll cannot be activated because expiration date must be future");
             }
-            if(poll.IsActive == true)
+            if (poll.IsActive == true)
             {
                 throw new ObjectValidationException("This poll is already open");
             }
             poll.IsActive = true;
             await _pollRepository.UpdateAsync(poll);
-            if(poll.PollType == Core.Enums.PollType.Protected)
+            if (poll.PollType == Core.Enums.PollType.Protected)
             {
-                if(poll.VotingTokens is null)
+                if (poll.VotingTokens is null)
                 {
                     poll.VotingTokens = new List<VotingToken>();
                 }
-                foreach(PollAllowed user in poll.AllowedUsers)
+                foreach (PollAllowed user in poll.AllowedUsers)
                 {
-                    string token = Guid.NewGuid().ToString();
-                    poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
-                    await _mailService.SendEmailAsync(user.User.Email, "Poll has started", $"Your voting token: {token}");
+                    await SendVotingToken(poll, user.User);
                 }
             }
 
+        }
+
+        private async Task SendVotingToken(Poll poll, User user)
+        {
+            string token = Guid.NewGuid().ToString();
+            poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
+            await _mailService.SendEmailAsync(user.Email, "Poll has started", $"Your voting token: {token}");
         }
 
         public async Task ClosePoll(int pollId)
@@ -98,11 +106,11 @@ namespace Application.Services
         {
             string? userId = GetCurrentUserId();
             Poll pollToDelete = await _pollRepository.GetByIdAsync(id);
-            if(pollToDelete is null)
+            if (pollToDelete is null)
             {
                 throw new ObjectNotFoundException("This poll does not exist");
             }
-            if(pollToDelete.CreatedBy != userId || pollToDelete.CreatedBy is null)
+            if (pollToDelete.CreatedBy != userId || pollToDelete.CreatedBy is null)
             {
                 throw new AccessForbiddenException("You dont have permissions to delete this poll");
             }
@@ -112,12 +120,12 @@ namespace Application.Services
         public async Task<PollBaseDTO> Get(int id)
         {
             bool isAnonymous = GetCurrentUserId() is null;
-            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x=>x.Id == id));
-            if(poll is null)
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == id));
+            if (poll is null)
             {
                 throw new ObjectNotFoundException("This poll does not exist");
             }
-            if(isAnonymous && !poll.AllowAnonymous)
+            if (isAnonymous && !poll.AllowAnonymous)
             {
                 throw new AccessForbiddenException("You are not allowed to join this poll");
             }
@@ -135,12 +143,12 @@ namespace Application.Services
         public async Task<IEnumerable<PollLiteDTO>> GetMyPolls()
         {
             string? userId = GetCurrentUserId();
-            if(userId is null)
+            if (userId is null)
             {
                 throw new AccessForbiddenException("You must be logged in");
             }
             IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
-            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y=>y.UserId == userId)??false));
+            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y => y.UserId == userId) ?? false));
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }
@@ -165,6 +173,59 @@ namespace Application.Services
             return result;
         }*/
 
+        public async Task InviteUsers(int pollId, PollInviteDTO pollInviteDTO)
+        {
+            string? userId = GetCurrentUserId();
+            Poll poll = await _pollRepository.GetByIdAsync(pollId);
+            if (poll is null)
+            {
+                throw new ObjectNotFoundException();
+            }
+            if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
+            {
+                throw new AccessForbiddenException("You dont have permissions to modify this poll");
+            }
+            if (poll.AllowedUsers is null)
+            {
+                poll.AllowedUsers = new List<PollAllowed>();
+            }
+            foreach (string id in pollInviteDTO.UserIds)
+            {
+                if (!poll.AllowedUsers.Any(x => x.UserId == id))
+                {
+                    var user = await _userManager.FindByIdAsync(id);
+                    if (user is null) continue;
+                    poll.AllowedUsers.Add(new PollAllowed() { UserId = id, PollId = poll.Id });
+                    if (poll.PollType == Core.Enums.PollType.Protected && poll.IsActive)
+                    {
+                        await SendVotingToken(poll, user);
+                    }
+                }
+            }
+        }
+
+        public async Task SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
+        {
+            string? userId = GetCurrentUserId();
+            Poll poll = await _pollRepository.GetByIdAsync(pollId);
+            if (poll is null)
+            {
+                throw new ObjectNotFoundException();
+            }
+            if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
+            {
+                throw new AccessForbiddenException("You dont have permissions to modify this poll");
+            }
+
+            poll.Moderators = new List<PollModerator>();
+
+            foreach (string id in pollInviteDTO.UserIds)
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user is null) continue;
+                poll.Moderators.Add(new PollModerator() { UserId = id, PollId = poll.Id });
+            }
+        }
         private string? GetCurrentUserId()
         {
             var identity = (ClaimsIdentity?)_contextAccessor.HttpContext?.User.Identity;

@@ -19,7 +19,7 @@ namespace Application.Mappers
                     source=> source.AllowedUsersIds.Select(id => new PollAllowed { UserId = id})))
                 .ForMember(dest => dest.Moderators,
                 opt => opt.MapFrom(
-                    source => source.ModeratorsIds.Select(id => new PollAllowed { UserId = id })))
+                    source => source.ModeratorsIds.Select(id => new PollModerator { UserId = id })))
                 .PreserveReferences();
             CreateMap<Poll, PollBaseDTO>().PreserveReferences();
             CreateMap<Poll, PollLiteDTO>().PreserveReferences();

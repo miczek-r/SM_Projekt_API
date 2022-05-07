@@ -41,10 +41,24 @@ namespace SM_Projekt.Controllers
             return Ok(await _pollService.Update(poll,id));
         }*/
 
-        [HttpPut("activate/{id}")]
-        public async Task<ActionResult> Activate(int id)
+        [HttpPut("Activate/{id}")]
+        public async Task<ActionResult> Activate(int pollId)
         {
-            await _pollService.OpenPoll(id);
+            await _pollService.OpenPoll(pollId);
+            return Ok();
+        }
+
+        [HttpPut("Invite/{id}")]
+        public async Task<ActionResult> InviteToPoll(int pollId, PollInviteDTO pollInviteDTO)
+        {
+            await _pollService.InviteUsers(pollId, pollInviteDTO);
+            return Ok();
+        }
+
+        [HttpPut("AddModerators/{id}")]
+        public async Task<ActionResult> SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
+        {
+            await _pollService.SetPollModerators(pollId, pollInviteDTO);
             return Ok();
         }
 
