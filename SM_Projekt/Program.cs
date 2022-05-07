@@ -29,6 +29,11 @@ if (/*app.Environment.IsDevelopment()*/true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseReDoc(c =>
+    {
+        c.DocumentTitle = "API Documentation";
+        c.SpecUrl = "/swagger/v1/swagger.json";
+    });
 }
 
 app.UseCors(x => x
