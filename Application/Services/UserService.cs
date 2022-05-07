@@ -84,7 +84,7 @@ namespace Application.Services
 
         public async Task ConfirmEmail(EmailConfirmationDTO confirmationDTO)
         {
-            var user = await _userManager.FindByEmailAsync(confirmationDTO.Email);
+            var user = await _userManager.FindByIdAsync(confirmationDTO.UserId);
             if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");

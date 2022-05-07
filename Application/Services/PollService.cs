@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Poll;
+﻿using Application.DTOs.Notification;
+using Application.DTOs.Poll;
 using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
@@ -19,18 +20,20 @@ namespace Application.Services
     public class PollService : IPollService
     {
         private readonly IPollRepository _pollRepository;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IMailService _mailService;
         private readonly UserManager<User> _userManager;
 
-        public PollService(IPollRepository pollRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IMailService mailservice, UserManager<User> userManager)
+        public PollService(IPollRepository pollRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, IMailService mailservice, UserManager<User> userManager, INotificationService notificationService)
         {
             _pollRepository = pollRepository;
             _mapper = mapper;
             _contextAccessor = httpContextAccessor;
             _mailService = mailservice;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         public async Task OpenPoll(int pollId)
@@ -55,13 +58,19 @@ namespace Application.Services
             }
             poll.IsActive = true;
             await _pollRepository.UpdateAsync(poll);
-            if (poll.PollType == Core.Enums.PollType.Protected)
+
+
+            if (poll.VotingTokens is null)
             {
-                if (poll.VotingTokens is null)
+                poll.VotingTokens = new List<VotingToken>();
+            }
+            foreach (PollAllowed user in poll.AllowedUsers)
+            {
+                if (poll.PollType == Core.Enums.PollType.Protected || poll.PollType == Core.Enums.PollType.Private)
                 {
-                    poll.VotingTokens = new List<VotingToken>();
+                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
                 }
-                foreach (PollAllowed user in poll.AllowedUsers)
+                if (poll.PollType == Core.Enums.PollType.Protected)
                 {
                     await SendVotingToken(poll, user.User);
                 }
@@ -73,13 +82,13 @@ namespace Application.Services
         {
             string token = Guid.NewGuid().ToString();
             poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
-            await _mailService.SendEmailAsync(user.Email, "Poll has started", $"Your voting token: {token}");
+            await _mailService.SendEmailAsync(user.Email, "Poll '{poll.Name}' has started", $"Your voting token: {token}");
         }
 
         public async Task ClosePoll(int pollId)
         {
             string? userId = GetCurrentUserId();
-            Poll poll = await _pollRepository.GetByIdAsync(pollId);
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
                 throw new ObjectNotFoundException("This poll does not exist");
@@ -90,6 +99,11 @@ namespace Application.Services
             }
             poll.IsActive = false;
             poll.VotingTokens = null;
+            foreach (PollAllowed user in poll.AllowedUsers)
+            {
+                await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has ended", Message = $"The poll: '{poll.Name}' has ended.", UserId = user.UserId });
+                await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", $"The poll: '{poll.Name}' has ended.");
+            }
             await _pollRepository.UpdateAsync(poll);
         }
 
@@ -212,6 +226,10 @@ namespace Application.Services
                     var user = await _userManager.FindByIdAsync(id);
                     if (user is null) continue;
                     poll.AllowedUsers.Add(new PollAllowed() { UserId = id, PollId = poll.Id });
+                    if (poll.PollType == Core.Enums.PollType.Protected || poll.PollType == Core.Enums.PollType.Private)
+                    {
+                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
+                    }
                     if (poll.PollType == Core.Enums.PollType.Protected && poll.IsActive)
                     {
                         await SendVotingToken(poll, user);

@@ -19,5 +19,6 @@ namespace Application.Interfaces
         Task InviteUsers(int pollId, PollInviteDTO pollInviteDTO);
         Task SetPollModerators(int pollId, PollInviteDTO pollInviteDTO);
         Task OpenPoll(int pollId);
+        Task ClosePoll(int pollId);
     }
 }

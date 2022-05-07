@@ -71,7 +71,7 @@ namespace SM_Projekt.Controllers
         [HttpDelete("{pollId}")]
         public async Task<ActionResult> Delete(int pollId)
         {
-            await _pollService.Delete(pollId);
+            await _pollService.ClosePoll(pollId);
             return Ok();
         }
 
