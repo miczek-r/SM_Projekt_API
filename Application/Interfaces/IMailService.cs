@@ -2,6 +2,6 @@
 {
     public interface IMailService
     {
-        Task SendEmailAsync(string to, string subject, string html, string from = null);
+        Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, object> replacementData);
     }
 }

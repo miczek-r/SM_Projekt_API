@@ -4,6 +4,7 @@ using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Repositories;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +45,7 @@ namespace Application.Services
             {
                 throw new ObjectNotFoundException("This poll does not exist");
             }
-            if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
+            if (poll.CreatedBy is not null && (userId is null || (poll.CreatedBy != userId && poll.Moderators.Any(x => x.UserId == userId))))
             {
                 throw new AccessForbiddenException("You dont have permissions to activate this poll");
             }
@@ -82,7 +83,16 @@ namespace Application.Services
         {
             string token = Guid.NewGuid().ToString();
             poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
-            await _mailService.SendEmailAsync(user.Email, "Poll '{poll.Name}' has started", $"Your voting token: {token}");
+            var replacementData = new Dictionary<string, object>
+                {
+                    {
+                        "PollName", poll.Name,
+                    },
+                    {
+                        "PollDescription", $"Voting token: {token}"
+                    }
+                };
+            await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has ended", "pollStarted.mustache", replacementData);
         }
 
         public async Task ClosePoll(int pollId)
@@ -102,7 +112,17 @@ namespace Application.Services
             foreach (PollAllowed user in poll.AllowedUsers)
             {
                 await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has ended", Message = $"The poll: '{poll.Name}' has ended.", UserId = user.UserId });
-                await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", $"The poll: '{poll.Name}' has ended.");
+
+                var replacementData = new Dictionary<string, object>
+                {
+                    {
+                        "PollName", poll.Name,
+                    },
+                    {
+                        "PollDescription", "ergerg"
+                    }
+                };
+                await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", "pollEnded.mustache", replacementData);
             }
             await _pollRepository.UpdateAsync(poll);
         }
@@ -110,13 +130,30 @@ namespace Application.Services
         public async Task<int> Create(PollCreateDTO pollCreateDTO)
         {
             string? userId = GetCurrentUserId();
+            if (userId is null) {
+                if (!pollCreateDTO.AllowAnonymous)
+                {
+                    throw new AccessForbiddenException("You must be logged in to create non anonymous polls");
+                }
+                if (!pollCreateDTO.ResultsArePublic)
+                {
+                    throw new AccessForbiddenException("You must be logged in to create polls with non public results");
+                }
+                if(pollCreateDTO.PollType == PollType.Private || pollCreateDTO.PollType == PollType.Protected)
+                {
+                    throw new AccessForbiddenException("You must be logged in to create protected and private polls");
+                }
+                if (pollCreateDTO.StartDate is not null)
+                {
+                    throw new AccessForbiddenException("You must be logged in to create polls with specific start date");
+                }
+            }
             Poll newPoll = _mapper.Map<Poll>(pollCreateDTO);
             newPoll.CreatedBy = userId;
-            newPoll.IsActive = newPoll.StartDate is null;
             await _pollRepository.AddAsync(newPoll);
-            if (newPoll.IsActive)
+            if (newPoll.StartDate is null)
             {
-                OpenPoll(newPoll.Id);
+                await OpenPoll(newPoll.Id);
             }
             return newPoll.Id;
         }

@@ -77,7 +77,13 @@ namespace Application.Services
                 throw new ObjectValidationException(errors);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await _mailService.SendEmailAsync(user.Email, $"Projekt z Sm: Potwierdź mail", $"Twoj token to: {token}");
+            var replacementData = new Dictionary<string, object>
+                {
+                    {
+                        "ConfirmationLink", "https://www.google.pl"
+                    }
+                };
+            await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation.mustache", replacementData);
             return user.Id;
 
         }
