@@ -208,7 +208,7 @@ namespace Application.Services
         public async Task<IEnumerable<PollLiteDTO>> GetAll()
         {
             IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
-            poll = poll.Where(x => x.PollType == Core.Enums.PollType.Public);
+            poll = poll.Where(x => x.PollType == PollType.Public);
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }
@@ -220,7 +220,7 @@ namespace Application.Services
                 throw new AccessForbiddenException("You must be logged in");
             }
             IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
-            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y => y.UserId == userId) ?? false));
+            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y => y.UserId == userId) ?? false) || (x.AllowedUsers?.Any(y => y.UserId == userId) ?? false));
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }

@@ -16,6 +16,7 @@ using System.Net.Mail;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Application.Services
 {
@@ -77,10 +78,12 @@ namespace Application.Services
                 throw new ObjectValidationException(errors);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = HttpUtility.UrlEncode(token);
+            var encodedId = HttpUtility.UrlEncode(user.Id);
             var replacementData = new Dictionary<string, object>
                 {
                     {
-                        "ConfirmationLink", "https://www.google.pl"
+                        "ConfirmationLink", $"link/{encodedId}/{encodedToken}"
                     }
                 };
             await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation.mustache", replacementData);
@@ -90,13 +93,15 @@ namespace Application.Services
 
         public async Task ConfirmEmail(EmailConfirmationDTO confirmationDTO)
         {
-            var user = await _userManager.FindByIdAsync(confirmationDTO.UserId);
+            var userId = HttpUtility.UrlDecode(confirmationDTO.UserId);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, confirmationDTO.ConfirmationToken);
+            var token = HttpUtility.UrlDecode(confirmationDTO.ConfirmationToken);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             
             if (!result.Succeeded)
             {
