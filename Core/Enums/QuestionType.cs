@@ -9,6 +9,8 @@ namespace Core.Enums
     public enum QuestionType
     {
         Closed,
-        Open
+        Open,
+        Emoji,
+        Reaction
     }
 }
