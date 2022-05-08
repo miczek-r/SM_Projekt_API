@@ -86,7 +86,7 @@ namespace Application.Services
             var replacementData = new Dictionary<string, object>
                 {
                     {
-                        "PollName", poll.Name,
+                        "PollName", poll.Name
                     },
                     {
                         "PollDescription", $"Voting token: {token}"
@@ -116,7 +116,7 @@ namespace Application.Services
                 var replacementData = new Dictionary<string, object>
                 {
                     {
-                        "PollName", poll.Name,
+                        "PollName", poll.Name
                     },
                     {
                         "PollDescription", "ergerg"
