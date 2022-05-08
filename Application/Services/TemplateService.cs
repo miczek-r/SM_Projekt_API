@@ -16,6 +16,11 @@ namespace Application.Services
         public async Task<string> Render(string templateName, Dictionary<string, object> replacementData)
         {
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), _templatesPathPart, templateName);
+
+            if (!Directory.Exists(templatePath))
+            {
+                templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Api", _templatesPathPart, templateName);
+            }
             var stubble = new StubbleBuilder().Build();
 
             using var streamReader = new StreamReader(templatePath);
