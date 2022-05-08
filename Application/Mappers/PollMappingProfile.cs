@@ -21,7 +21,8 @@ namespace Application.Mappers
                 opt => opt.MapFrom(
                     source => source.ModeratorsIds.Select(id => new PollModerator { UserId = id })))
                 .PreserveReferences();
-            CreateMap<Poll, PollBaseDTO>().PreserveReferences();
+            CreateMap<Poll, PollBaseDTO>()
+                .PreserveReferences();
             CreateMap<Poll, PollLiteDTO>().PreserveReferences();
             CreateMap<Poll, PollInfoDTO>().PreserveReferences()
                 .ForMember(dest => dest.Moderators, opt => opt.MapFrom(so => so.Moderators.Select(t => t.User).ToList()))

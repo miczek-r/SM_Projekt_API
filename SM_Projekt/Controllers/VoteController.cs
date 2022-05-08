@@ -22,13 +22,6 @@ namespace SM_Projekt.Controllers
             return Ok(await _voteService.Get(pollId));
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Vote(VoteCreateDTO voteBaseDTO)
-        {
-            await _voteService.VoteSingle(voteBaseDTO);
-            return Ok();
-        }
-
         [HttpPost("Aggregate")]
         public async Task<ActionResult> VoteAggregate(VoteAggregateDTO voteAggregateDTO)
         {

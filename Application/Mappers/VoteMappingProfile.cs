@@ -13,8 +13,17 @@ namespace Application.Mappers
     {
         public VoteMappingProfile()
         {
-            CreateMap<Vote, VoteBaseDTO>().PreserveReferences();
-            CreateMap<VoteCreateDTO, Vote>().PreserveReferences();
+            CreateMap<Vote, VoteBaseDTO>().PreserveReferences()
+                .ForMember(dest => dest.Question, opt =>
+                    opt.MapFrom(src => src.Question.Text))
+                .ForMember(dest => dest.Answer, opt =>
+                    opt.MapFrom(src => src.Answer.Text));
+            CreateMap<VoteCreateDTO, Vote>().PreserveReferences()
+                .ForMember(dest => dest.Answer, opt =>
+                 {
+                     opt.PreCondition(src => src.AnswerText is not null);
+                     opt.MapFrom(src => new Answer() { Text = src.AnswerText, QuestionId = src.QuestionId });
+                 });
         }
     }
 }

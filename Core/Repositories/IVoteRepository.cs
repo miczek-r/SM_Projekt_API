@@ -10,5 +10,6 @@ namespace Core.Repositories
 {
     public interface IVoteRepository : IRepository<Vote>
     {
+        Task<Vote> AddWithoutSavingAsync(Vote entity);
     }
 }

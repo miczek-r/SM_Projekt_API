@@ -10,6 +10,5 @@ namespace Application.Interfaces
     public interface IAuthenticationService
     {
         Task<LoginResponseDTO> Login(LoginDTO model);
-        Task<TokenInfoDTO> RefreshToken(string refreshToken);
     }
 }

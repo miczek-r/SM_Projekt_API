@@ -112,7 +112,12 @@ namespace Application.Services
             string? userId = GetCurrentUserId();
             Poll newPoll = _mapper.Map<Poll>(pollCreateDTO);
             newPoll.CreatedBy = userId;
+            newPoll.IsActive = newPoll.StartDate is null;
             await _pollRepository.AddAsync(newPoll);
+            if (newPoll.IsActive)
+            {
+                OpenPoll(newPoll.Id);
+            }
             return newPoll.Id;
         }
 

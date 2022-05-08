@@ -1,5 +1,9 @@
 ﻿using Application.DTO;
+using Application.DTOs.Poll;
+using Application.DTOs.Vote;
+using Application.Validators.Poll;
 using Application.Validators.User;
+using Application.Validators.Vote;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using System.Reflection;
@@ -20,6 +24,8 @@ namespace SM_Projekt.Configurations
             });
 
             services.AddTransient<IValidator<UserCreateDTO>, UserCreateValidator>();
+            services.AddTransient<IValidator<PollCreateDTO>, PollCreateValidator>();
+            services.AddTransient<IValidator<VoteAggregateDTO>, VoteAggregateValidator>();
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Application.DTOs.Vote
     public class VoteCreateDTO
     {
         public int QuestionId { get; set; }
-        public int AnswerId { get; set; }
+        public int? AnswerId { get; set; }
+        public string? AnswerText { get; set; }
     }
 }

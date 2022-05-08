@@ -51,12 +51,11 @@ namespace Application.Services
                 TokenInfoDTO tokenInfo = await GenerateToken(user);
                 return new LoginResponseDTO(tokenInfo);
             }
+            if (loginResult.IsLockedOut)
+            {
+                throw new ObjectValidationException("User is loceked out. Try again in 15 minutes");
+            }
             throw new ObjectNotFoundException("User with this combination of username and password does not exist");
-        }
-
-        public Task<TokenInfoDTO> RefreshToken(string refreshToken)
-        {
-            throw new NotImplementedException();
         }
 
         private async Task<TokenInfoDTO> GenerateToken(User user)

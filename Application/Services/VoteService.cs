@@ -38,7 +38,15 @@ namespace Application.Services
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
-                throw new ObjectNotFoundException("This poll does not exist");
+                throw new ObjectNotFoundException("This poll does not exists");
+            }
+            if (!poll.IsActive)
+            {
+                if (poll.StartDate is not null && poll.StartDate > DateTime.Now)
+                {
+                    throw new AccessForbiddenException("This poll has not started yet");
+                }
+                throw new AccessForbiddenException("This poll has already ended");
             }
             if (!poll.ResultsArePublic && poll.CreatedBy != userId && !(poll.Moderators?.Any(x => x.UserId == userId) ?? false))
             {
@@ -48,8 +56,13 @@ namespace Application.Services
             ICollection<VoteQuestionInfoDTO> voteQuestions = new List<VoteQuestionInfoDTO>();
             foreach (var question in poll.Questions)
             {
+
                 var votesInQuestion = await _voteRepository.GetByLambdaAsync(x => x.QuestionId == question.Id);
                 votes.AddRange(votesInQuestion);
+                if(question.Type == QuestionType.Open)
+                {
+                    continue;
+                }
                 var test = new VoteQuestionInfoDTO
                 {
                     QuestionId = question.Id,
@@ -64,29 +77,29 @@ namespace Application.Services
             return new VoteInfoDTO { BaseAnswers = baseAnswers, VoteQuestions = voteQuestions };
         }
 
-        public async Task VoteSingle(VoteCreateDTO vote)
-        {
-            string? userId = GetCurrentUserId();
-
-            //TODO: If not allowed to vote in this poll throw error
-            await Vote(vote, userId);
-        }
-
         public async Task VoteAggregate(VoteAggregateDTO votes)
         {
             string? userId = GetCurrentUserId();
-            Poll poll = await _pollRepository.GetByIdAsync(votes.PollId);
-            if(poll is null)
+            Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == votes.PollId));
+            if (poll is null)
             {
                 throw new ObjectNotFoundException("This poll does not exists");
             }
             if(!poll.AllowAnonymous && userId is null)
             {
-                throw new ObjectValidationException("You must be logged in to vote in this poll");
+                throw new AccessForbiddenException("You must be logged in to vote in this poll");
             }
-            if (votes.Votes is null)
+            if (!poll.IsActive)
             {
-                throw new ObjectValidationException("There are no votes");
+                if (poll.StartDate is not null && poll.StartDate > DateTime.Now)
+                {
+                    throw new AccessForbiddenException("This poll has not started yet");
+                }
+                throw new AccessForbiddenException("This poll has already ended");
+            }
+            if (poll.PollType == PollType.Protected && votes.VotingToken is null)
+            {
+                throw new AccessForbiddenException("For this poll voting token is needed");
             }
             if (userId is not null && (await _voteRepository.GetByLambdaAsync(x => x.UserId == userId && x.Question.PollId == votes.PollId)).Any())
             {
@@ -94,14 +107,36 @@ namespace Application.Services
             }
             foreach (var vote in votes.Votes)
             {
+                var question = poll.Questions?.First(x => x.Id == vote.QuestionId);
+                if (question is null)
+                {
+                    throw new ObjectNotFoundException($"Question with id {vote.QuestionId} does not exists in this poll");
+                }
+                if (question.Type == QuestionType.Open && vote.AnswerText is null)
+                {
+                    if(vote.AnswerId is not null)
+                    {
+                        throw new ObjectValidationException("Open question requires null AnswerId");
+                    }
+                    throw new ObjectValidationException("Open question requires non null AnswerText");
+                }
+                else if (question.Type == QuestionType.Closed && vote.AnswerId is null)
+                {
+                    if (vote.AnswerText is not null)
+                    {
+                        throw new ObjectValidationException("Open question requires null AnswerId");
+                    }
+                    throw new ObjectValidationException("Open question requires non null AnswerText");
+                }
                 await Vote(vote, userId);
             }
+            await _voteRepository.SaveAsync();
         }
         private async Task Vote(VoteCreateDTO vote, string? userId)
         {
             Vote newVote = _mapper.Map<Vote>(vote);
             newVote.UserId = userId;
-            await _voteRepository.AddAsync(newVote);
+            await _voteRepository.AddWithoutSavingAsync(newVote);
         }
 
         private string? GetCurrentUserId()
