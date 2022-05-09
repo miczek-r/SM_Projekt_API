@@ -271,10 +271,9 @@ namespace Application.Services
                     var user = await _userManager.FindByIdAsync(id);
                     if (user is null) continue;
                     poll.AllowedUsers.Add(new PollAllowed() { UserId = id, PollId = poll.Id });
-                    if (poll.PollType == Core.Enums.PollType.Protected || poll.PollType == Core.Enums.PollType.Private)
-                    {
-                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
-                    }
+
+                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
+
                     if (poll.PollType == Core.Enums.PollType.Protected && poll.IsActive)
                     {
                         await SendVotingToken(poll, user);
