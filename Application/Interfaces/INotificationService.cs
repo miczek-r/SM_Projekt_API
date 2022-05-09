@@ -11,6 +11,7 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<NotificationLiteDTO>> GetAll();
         Task<NotificationBaseDTO> Get(int notificationId);
+        Task<NotificationBaseDTO> GetPrivate(int notificationId);
         Task Delete(int notificationId);
         Task<int> Create(NotificationCreateDTO notificationCreateDTO);
         Task SetAsSeen(int notificationId);

@@ -68,6 +68,13 @@ namespace Application.Services
             return result;
         }
 
+        public async Task<NotificationBaseDTO> GetPrivate(int notificationId)
+        {
+            Notification notification = await _notificationRepository.GetByIdAsync(notificationId);
+            NotificationBaseDTO result = _mapper.Map<NotificationBaseDTO>(notification);
+            return result;
+        }
+
         public async Task<IEnumerable<NotificationLiteDTO>> GetAll()
         {
             string? userId = GetCurrentUserId();
