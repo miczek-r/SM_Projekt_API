@@ -86,7 +86,7 @@ namespace Application.Services
                         "ConfirmationLink", $"link/{encodedId}/{encodedToken}"
                     }
                 };
-            await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation.mustache", replacementData);
+            await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation", replacementData);
             return user.Id;
 
         }

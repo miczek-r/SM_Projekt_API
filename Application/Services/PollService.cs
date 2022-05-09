@@ -92,7 +92,7 @@ namespace Application.Services
                         "PollDescription", $"Voting token: {token}"
                     }
                 };
-            await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has ended", "pollStarted.mustache", replacementData);
+            await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has ended", "pollStarted", replacementData);
         }
 
         public async Task ClosePoll(int pollId)
@@ -122,7 +122,7 @@ namespace Application.Services
                         "PollDescription", "ergerg"
                     }
                 };
-                await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", "pollEnded.mustache", replacementData);
+                await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", "pollEnded", replacementData);
             }
             await _pollRepository.UpdateAsync(poll);
         }

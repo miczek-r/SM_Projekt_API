@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Templates;
 using Stubble.Core.Builders;
 using System;
 using System.Collections.Generic;
@@ -11,20 +12,24 @@ namespace Application.Services
     public class TemplateService : ITemplateService
     {
 
-        private const string _templatesPathPart = "Templates";
-
         public async Task<string> Render(string templateName, Dictionary<string, object> replacementData)
         {
-            string templatePath = Path.Combine(Directory.GetCurrentDirectory(), _templatesPathPart, templateName);
-
-            if (!Directory.Exists(templatePath))
+            string template = "";
+            switch (templateName)
             {
-                templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Api", _templatesPathPart, templateName);
+                case "confirmation":
+                    template = ConfirmationTemplate.Template;
+                    break;
+                case "pollStarted":
+                    template = PollStartedTemplate.Template;
+                    break;
+                case "pollEnded":
+                    template = PollEndedTemplate.Template;
+                    break;
             }
             var stubble = new StubbleBuilder().Build();
 
-            using var streamReader = new StreamReader(templatePath);
-            return await stubble.RenderAsync(await streamReader.ReadToEndAsync(), replacementData);
+            return await stubble.RenderAsync(template, replacementData);
 
         }
     }

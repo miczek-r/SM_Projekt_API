@@ -8,6 +8,7 @@ namespace Application.DTOs.Vote
 {
     public class VoteBaseDTO
     {
+        public int QuestionType { get; set; }
         public string UserId { get; set; }
         public int QuestionId { get; set; }
         public string Question { get; set; }

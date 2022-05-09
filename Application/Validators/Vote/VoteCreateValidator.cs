@@ -12,8 +12,7 @@ namespace Application.Validators.Vote
     {
         public VoteCreateValidator()
         {
-            RuleFor(x => x.AnswerText).NotEmpty().When(x => x.AnswerId is null);
-            RuleFor(x => x.AnswerId).NotEmpty().When(x => x.AnswerText is null);
+            RuleFor(x => x.AnswerText).NotEmpty().When(x => x.AnswerId is null).WithMessage("AnswerText or AnswerId must not be null.");
             RuleFor(x => x.AnswerText).Null().When(x => x.AnswerId is not null);
             RuleFor(x => x.AnswerId).Null().When(x => x.AnswerText is not null);
         }
