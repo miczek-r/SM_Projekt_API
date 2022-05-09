@@ -67,10 +67,7 @@ namespace Application.Services
             }
             foreach (PollAllowed user in poll.AllowedUsers)
             {
-                if (poll.PollType == Core.Enums.PollType.Protected || poll.PollType == Core.Enums.PollType.Private)
-                {
-                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
-                }
+                await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
                 if (poll.PollType == Core.Enums.PollType.Protected)
                 {
                     await SendVotingToken(poll, user.User);
@@ -130,7 +127,8 @@ namespace Application.Services
         public async Task<int> Create(PollCreateDTO pollCreateDTO)
         {
             string? userId = GetCurrentUserId();
-            if (userId is null) {
+            if (userId is null)
+            {
                 if (!pollCreateDTO.AllowAnonymous)
                 {
                     throw new AccessForbiddenException("You must be logged in to create non anonymous polls");
@@ -139,7 +137,7 @@ namespace Application.Services
                 {
                     throw new AccessForbiddenException("You must be logged in to create polls with non public results");
                 }
-                if(pollCreateDTO.PollType == PollType.Private || pollCreateDTO.PollType == PollType.Protected)
+                if (pollCreateDTO.PollType == PollType.Private || pollCreateDTO.PollType == PollType.Protected)
                 {
                     throw new AccessForbiddenException("You must be logged in to create protected and private polls");
                 }
@@ -219,8 +217,13 @@ namespace Application.Services
             {
                 throw new AccessForbiddenException("You must be logged in");
             }
-            IEnumerable<Poll> poll = await _pollRepository.GetAllAsync();
-            poll = poll.Where(x => x.CreatedBy == userId || (x.Moderators?.Any(y => y.UserId == userId) ?? false) || (x.AllowedUsers?.Any(y => y.UserId == userId) ?? false));
+            IEnumerable<Poll> poll = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x =>
+                 x.Moderators != null && x.AllowedUsers != null
+                && (x.CreatedBy == userId
+                || x.Moderators.Any(y => y.UserId == userId)
+                || x.AllowedUsers.Any(y => y.UserId == userId))
+            ));
+
             IEnumerable<PollLiteDTO> result = _mapper.Map<IEnumerable<PollLiteDTO>>(poll);
             return result;
         }
@@ -268,10 +271,9 @@ namespace Application.Services
                     var user = await _userManager.FindByIdAsync(id);
                     if (user is null) continue;
                     poll.AllowedUsers.Add(new PollAllowed() { UserId = id, PollId = poll.Id });
-                    if (poll.PollType == Core.Enums.PollType.Protected || poll.PollType == Core.Enums.PollType.Private)
-                    {
-                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
-                    }
+
+                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
+
                     if (poll.PollType == Core.Enums.PollType.Protected && poll.IsActive)
                     {
                         await SendVotingToken(poll, user);
