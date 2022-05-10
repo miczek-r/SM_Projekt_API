@@ -2,12 +2,15 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace SM_Projekt.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public class PollController : ControllerBase
     {
         private readonly IPollService _pollService;
@@ -18,24 +21,41 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpGet]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<PollBaseDTO>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetAll()
         {
             return Ok(await _pollService.GetAll());
         }
 
         [HttpGet("{pollId}")]
-        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Get(int pollId)
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(PollBaseDTO))]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PollBaseDTO>> Get(int pollId)
         {
             return Ok(await _pollService.Get(pollId));
         }
 
         [HttpGet("GetInfo/{pollId}")]
-        public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetInfo(int pollId)
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(PollBaseDTO))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PollBaseDTO>> GetInfo(int pollId)
         {
             return Ok(await _pollService.GetInfo(pollId));
         }
 
         [HttpGet("MyPolls")]
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<PollBaseDTO>))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetMyPolls()
         {
             return Ok(await _pollService.GetMyPolls());
@@ -48,40 +68,71 @@ namespace SM_Projekt.Controllers
         }*/
 
         [HttpPut("Activate/{pollId}")]
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Activate(int pollId)
         {
             await _pollService.OpenPoll(pollId);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut("Invite/{pollId}")]
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> InviteToPoll(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.InviteUsers(pollId, pollInviteDTO);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut("SetModerators/{pollId}")]
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.SetPollModerators(pollId, pollInviteDTO);
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("{pollId}")]
+        [Authorize]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Delete(int pollId)
         {
             await _pollService.ClosePoll(pollId);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
+        [SwaggerResponse(StatusCodes.Status201Created)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status403Forbidden)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
             
             int id = await _pollService.Create(pollCreateDTO);
             PollBaseDTO poll = await _pollService.Get(id);
-            return CreatedAtAction(nameof(UserController.Get), new { id }, poll);
+            return CreatedAtAction(nameof(PollController.Post), new { id }, poll);
         }
 
     }

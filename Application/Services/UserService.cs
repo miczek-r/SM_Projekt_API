@@ -35,7 +35,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<UserBaseDTO>> GetAll()
         {
-            IEnumerable<User> users = await _userManager.Users.ToListAsync() ?? new List<User>();
+            IEnumerable<User> users = await _userManager.Users.ToListAsync();
             return _mapper.Map<List<UserBaseDTO>>(users);
         }
 
@@ -83,7 +83,7 @@ namespace Application.Services
             var replacementData = new Dictionary<string, object>
                 {
                     {
-                        "ConfirmationLink", $"link/{encodedId}/{encodedToken}"
+                        "ConfirmationLink", $"https://smprojekt.herokuapp.com/ConfirmEmail/{encodedId}/{encodedToken}"
                     }
                 };
             await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation", replacementData);

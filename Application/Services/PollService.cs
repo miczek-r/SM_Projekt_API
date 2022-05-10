@@ -7,6 +7,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Repositories;
 using Core.Specifications;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -254,7 +255,7 @@ namespace Application.Services
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {
@@ -289,7 +290,7 @@ namespace Application.Services
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {

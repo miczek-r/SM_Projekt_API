@@ -10,6 +10,8 @@ namespace SM_Projekt.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
@@ -19,12 +21,18 @@ namespace SM_Projekt.Controllers
             _authenticationService = authenticationService;
         }
 
+        /// <summary>
+        /// Login
+        /// </summary>
+        /// <remarks>Allows loging in using JWT Token.</remarks>
+        /// <param name="loginDTO"></param>
+        /// <returns>Returns LoginResponseDTO which contains JWT Token and its expiration date</returns>
         [AllowAnonymous]
-        [HttpPost("/login")]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(LoginResponseDTO))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [HttpPost("/login", Name = "Login")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Login success", Type = typeof(LoginResponseDTO))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "User is not activated or he is locked in")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "User not found")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginDTO loginDTO)
         {
             return Ok(await _authenticationService.Login(loginDTO));

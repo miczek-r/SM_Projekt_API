@@ -11,6 +11,8 @@ namespace SM_Projekt.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;

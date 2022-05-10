@@ -1,4 +1,7 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 
 namespace SM_Projekt.Configurations
@@ -15,15 +18,13 @@ namespace SM_Projekt.Configurations
                 Contact = new OpenApiContact() { Name = "Rafał Miczek", Email = "miczek.r@gmail.com" },
                 License = new OpenApiLicense() { Name = "GNU General Public License", Url = new Uri("https://opensource.org/licenses/gpl-license") }
             };
-
             services.AddSwaggerGen(c =>
             {
-                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                c.EnableAnnotations();
+                c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
                 c.SwaggerDoc("v1", info);
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                {
+            {
                     Name = "Authorization",
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer",
@@ -46,6 +47,7 @@ namespace SM_Projekt.Configurations
                     }
                 });
             });
+            services.AddSwaggerGenNewtonsoftSupport();
         }
     }
 }
