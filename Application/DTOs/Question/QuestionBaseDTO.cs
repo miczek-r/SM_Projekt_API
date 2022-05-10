@@ -1,11 +1,6 @@
 ﻿using Application.DTOs.Answer;
 using Core.Enums;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.DTOs.Question
 {

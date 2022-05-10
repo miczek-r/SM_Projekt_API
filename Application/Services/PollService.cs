@@ -7,15 +7,9 @@ using Core.Entities;
 using Core.Enums;
 using Core.Repositories;
 using Core.Specifications;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -315,7 +309,7 @@ namespace Application.Services
         public async Task OpenAllPolls()
         {
             var time = DateTime.Now;
-            IEnumerable <Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x =>  x.StartDate <= time && (x.EndDate == null || x.EndDate >= time) && !x.IsActive));
+            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.StartDate <= time && (x.EndDate == null || x.EndDate >= time) && !x.IsActive));
             foreach (Poll poll in polls)
             {
                 poll.IsActive = true;

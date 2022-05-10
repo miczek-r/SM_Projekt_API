@@ -20,7 +20,7 @@ namespace SM_Projekt.Controllers
         {
             _authenticationService = authenticationService;
         }
-        
+
         [AllowAnonymous]
         [HttpPost("/login")]
         [SwaggerOperation(

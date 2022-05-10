@@ -5,17 +5,8 @@ using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
 using Core.Entities;
-using Core.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace Application.Services
@@ -102,7 +93,7 @@ namespace Application.Services
 
             var token = HttpUtility.UrlDecode(confirmationDTO.ConfirmationToken);
             var result = await _userManager.ConfirmEmailAsync(user, token);
-            
+
             if (!result.Succeeded)
             {
                 string errors = "";

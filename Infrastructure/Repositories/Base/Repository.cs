@@ -1,13 +1,6 @@
-﻿using Core.Repositories.Base;
-using Core.Specifications.Base;
-using Infrastructure.Data;
+﻿using Core.Specifications.Base;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Base
 {

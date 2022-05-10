@@ -1,17 +1,12 @@
 using Application.DTO;
 using Application.DTO.User;
-using Core.Entities;
 using Faker;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -25,13 +20,13 @@ namespace UnitTests
         {
             var _application = new Application();
             _client = _application.CreateClient();
-           
+
         }
 
         [Fact]
         public async Task ShouldCreateUser()
         {
-            UserCreateDTO userCreateDTO = new ();
+            UserCreateDTO userCreateDTO = new();
             userCreateDTO.Email = Internet.Email();
             userCreateDTO.Password = "!Admin123";
             var response = await _client.PostAsJsonAsync("/api/user", userCreateDTO);

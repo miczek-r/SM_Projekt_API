@@ -1,22 +1,14 @@
-﻿using Application.DTO;
-using Application.DTO.User;
-using Application.DTOs.Answer;
+﻿using Application.DTOs.Answer;
 using Application.DTOs.Poll;
 using Application.DTOs.Question;
-using Core.Entities;
 using Core.Enums;
-using Faker;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -36,7 +28,7 @@ namespace UnitTests
         [Fact]
         public async Task ShouldCreatePoll()
         {
-            PollCreateDTO pollCreateDTO = new ();
+            PollCreateDTO pollCreateDTO = new();
             pollCreateDTO.StartDate = null;
             pollCreateDTO.EndDate = null;
             pollCreateDTO.AllowAnonymous = true;

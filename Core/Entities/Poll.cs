@@ -1,14 +1,9 @@
 ﻿using Core.Entities.Base;
 using Core.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class Poll: BaseEntity
+    public class Poll : BaseEntity
     {
         public string Name { get; set; }
         public string? CreatedBy { get; set; }
@@ -22,6 +17,6 @@ namespace Core.Entities
         public virtual ICollection<PollModerator>? Moderators { get; set; }
         public virtual ICollection<Question>? Questions { get; set; }
         public virtual ICollection<VotingToken>? VotingTokens { get; set; }
-        
+
     }
 }

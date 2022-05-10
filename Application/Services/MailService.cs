@@ -1,16 +1,7 @@
 ﻿using Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Services
 {
