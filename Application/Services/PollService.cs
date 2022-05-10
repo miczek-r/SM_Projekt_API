@@ -314,7 +314,8 @@ namespace Application.Services
 
         public async Task OpenAllPolls()
         {
-            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x =>  x.StartDate <= DateTime.Now && (x.EndDate == null || x.EndDate >= DateTime.Now) && !x.IsActive));
+            var time = DateTime.Now;
+            IEnumerable <Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x =>  x.StartDate <= time && (x.EndDate == null || x.EndDate >= time) && !x.IsActive));
             foreach (Poll poll in polls)
             {
                 poll.IsActive = true;
@@ -346,7 +347,8 @@ namespace Application.Services
 
         public async Task CloseAllPolls()
         {
-            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.EndDate <= DateTime.Now && x.IsActive));
+            var time = DateTime.Now;
+            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.EndDate <= time && x.IsActive));
             foreach (Poll poll in polls)
             {
                 poll.IsActive = false;
