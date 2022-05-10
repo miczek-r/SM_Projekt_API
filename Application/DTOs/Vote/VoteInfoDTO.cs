@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,9 @@ namespace Application.DTOs.Vote
 {
     public class VoteInfoDTO
     {
-        public ICollection<VoteQuestionInfoDTO>? VoteQuestions { get; set; }
+        [SwaggerSchema("The list of list of all submitted votes summary for selected poll")]
+        public ICollection<VoteSummaryDTO>? VoteQuestions { get; set; }
+        [SwaggerSchema("The list of list of all submitted votes for selected poll")]
         public ICollection<VoteBaseDTO>? BaseAnswers { get; set; }
     }
 }

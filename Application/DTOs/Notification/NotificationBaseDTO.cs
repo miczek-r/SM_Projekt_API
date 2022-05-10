@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,14 @@ namespace Application.DTOs.Notification
 {
     public class NotificationBaseDTO
     {
+        [SwaggerSchema("The notification identifier")]
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Message { get; set; }
+        [SwaggerSchema("The notification title", Nullable = false)]
+        public string Title { get; set; } = string.Empty;
+
+        [SwaggerSchema("The notification detailed message", Nullable = false)]
+        public string Message { get; set; } = string.Empty ;
+        [SwaggerSchema("The boolean determining if the notification was seen when true")]
         public bool Seen { get; set; }
     }
 }

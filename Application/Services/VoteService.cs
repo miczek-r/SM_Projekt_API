@@ -53,7 +53,7 @@ namespace Application.Services
                 throw new AccessForbiddenException("You are not allowed to view this poll results");
             }
             List<Vote> votes = new();
-            ICollection<VoteQuestionInfoDTO> voteQuestions = new List<VoteQuestionInfoDTO>();
+            ICollection<VoteSummaryDTO> voteQuestions = new List<VoteSummaryDTO>();
             foreach (var question in poll.Questions)
             {
 
@@ -63,12 +63,12 @@ namespace Application.Services
                 {
                     continue;
                 }
-                var test = new VoteQuestionInfoDTO
+                var test = new VoteSummaryDTO
                 {
                     QuestionId = question.Id,
                     QuestionText = question.Text,
                     QuestionType = question.Type,
-                    Answers = votesInQuestion.GroupBy(x => x.Answer).Select(group => new VoteAnswerInfoDTO { AnswerId = group.Key.Id, AnswerText = group.Key.Text, Count = group.Count() }).ToList()
+                    Answers = votesInQuestion.GroupBy(x => x.Answer).Select(group => new AnswerVotingSummaryDTO { AnswerId = group.Key.Id, AnswerText = group.Key.Text, Count = group.Count() }).ToList()
                 };
                 voteQuestions.Add(test);
             }
@@ -97,9 +97,16 @@ namespace Application.Services
                 }
                 throw new AccessForbiddenException("This poll has already ended");
             }
-            if (poll.PollType == PollType.Protected && votes.VotingToken is null)
+            if (poll.PollType == PollType.Protected)
             {
-                throw new AccessForbiddenException("For this poll voting token is needed");
+                if(votes.VotingToken is null)
+                {
+                    throw new AccessForbiddenException("For this poll voting token is needed");
+                }
+                if(!poll.VotingTokens.Any(x=> x.Token == votes.VotingToken))
+                {
+                    throw new ObjectNotFoundException("Provided token is not eligible for this poll");
+                }
             }
             if (userId is not null && (await _voteRepository.GetByLambdaAsync(x => x.UserId == userId && x.Question.PollId == votes.PollId)).Any())
             {
@@ -130,7 +137,15 @@ namespace Application.Services
                 }
                 await Vote(vote, userId);
             }
+
             await _voteRepository.SaveAsync();
+
+            if (poll.PollType == PollType.Protected)
+            {
+                var token = poll.VotingTokens.First(x => x.Token == votes.VotingToken);
+                poll.VotingTokens.Remove(token);
+                await _pollRepository.UpdateAsync(poll);
+            }
         }
         private async Task Vote(VoteCreateDTO vote, string? userId)
         {
