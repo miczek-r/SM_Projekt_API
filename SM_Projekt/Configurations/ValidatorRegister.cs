@@ -1,7 +1,16 @@
 ﻿using Application.DTO;
+using Application.DTOs.Poll;
+using Application.DTOs.User;
+using Application.DTOs.Vote;
+using Application.Validators;
+using Application.Validators.Authentication;
+using Application.Validators.Poll;
 using Application.Validators.User;
-using FluentValidation;
+using Application.Validators.Vote;
 using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Newtonsoft.Json.Converters;
 using System.Reflection;
 
 namespace SM_Projekt.Configurations
@@ -10,16 +19,16 @@ namespace SM_Projekt.Configurations
     {
         public static void RegisterValidators(this IServiceCollection services)
         {
-            services.AddControllers().AddFluentValidation(fv =>
+            services.AddControllers().AddNewtonsoftJson(options =>
+        options.SerializerSettings.Converters.Add(new StringEnumConverter())).AddFluentValidation(c =>
             {
-                fv.ImplicitlyValidateChildProperties = true;
-                fv.ImplicitlyValidateRootCollectionElements = true;
-
-                fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
+                c.DisableDataAnnotationsValidation = true;
+                c.RegisterValidatorsFromAssemblyContaining<IValidator>();
+                // Optionally set validator factory if you have problems with scope resolve inside validators.
+                c.ValidatorFactoryType = typeof(HttpContextServiceProviderValidatorFactory);
             });
 
-            services.AddTransient<IValidator<UserCreateDTO>, UserCreateValidator>();
+            services.AddFluentValidationRulesToSwagger();
         }
     }
 }

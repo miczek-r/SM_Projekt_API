@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,11 +10,13 @@ namespace Application.DTO
 {
     public class UserCreateDTO
     {
-        [Required(ErrorMessage = "Email is required")]
-        public string Email { get; set; }
-        [Required(ErrorMessage = "Password is required")]
-        public string Password { get; set; }
-        public string? FirstName { get; set; }  
+        [SwaggerSchema("The user email", Nullable = false)]
+        public string Email { get; set; } = string.Empty;
+        [SwaggerSchema("The user password", Nullable = false, Format = "password")]
+        public string Password { get; set; } = string.Empty;
+        [SwaggerSchema("The user first name")]
+        public string? FirstName { get; set; }
+        [SwaggerSchema("The user last name")]
         public string? LastName { get; set; }
     }
 }

@@ -43,6 +43,26 @@ namespace Infrastructure.Repositories.Base
             return await _dbContext.Set<T>().FindAsync(id);
         }
 
+        public async Task<IReadOnlyList<T>> GetAllBySpecAsync(ISpecification<T> spec)
+        {
+            IQueryable<T> queryableResultWithIncludes = spec.Includes
+                  .Aggregate(_dbContext.Set<T>().AsQueryable(),
+                      (current, include) => current.Include(include));
+
+            IQueryable<T> secondaryResult = spec.IncludeStrings
+                .Aggregate(queryableResultWithIncludes,
+                    (current, include) => current.Include(include));
+
+            if (spec.IgnoreQueryFilter)
+            {
+                return await secondaryResult
+                            .IgnoreQueryFilters()
+                            .Where(spec.Criteria).ToListAsync();
+            }
+            return await secondaryResult
+                            .Where(spec.Criteria).ToListAsync();
+        }
+
         public async Task<T> GetBySpecAsync(ISpecification<T> spec)
         {
             IQueryable<T> queryableResultWithIncludes = spec.Includes

@@ -1,11 +1,17 @@
 using SM_Projekt.Helpers;
 
 using SM_Projekt.Configurations;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (!builder.Environment.IsDevelopment())
+{
+    var port = Environment.GetEnvironmentVariable("PORT");
+    builder.WebHost.UseUrls("http://*:" + port);
+}
 
-
+builder.Services.AddHealthChecks();
 builder.Services.RegisterValidators();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.RegisterSwagger();
@@ -23,6 +29,11 @@ if (/*app.Environment.IsDevelopment()*/true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseReDoc(c =>
+    {
+        c.DocumentTitle = "API Documentation";
+        c.SpecUrl = "/swagger/v1/swagger.json";
+    });
 }
 
 app.UseCors(x => x
@@ -31,7 +42,12 @@ app.UseCors(x => x
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials());
 
-
+app.MapGet("/version", async context =>
+{
+    var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+    await context.Response.WriteAsync(version);
+});
+app.MapHealthChecks("/health");
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

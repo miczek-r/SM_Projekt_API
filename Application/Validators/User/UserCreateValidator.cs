@@ -12,7 +12,8 @@ namespace Application.Validators.User
     {
         public UserCreateValidator()
         {
-            RuleFor(x=> x.Email).NotNull().NotEmpty().EmailAddress();
+            RuleFor(x=> x.Email).NotEmpty().EmailAddress();
+            RuleFor(x => x.Password).NotEmpty();
         }
     }
 }

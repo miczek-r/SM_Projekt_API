@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Core.Enums
 {
+    [SwaggerSchema("The enumerable determinig type of the question")]
     public enum QuestionType
     {
         Closed,
-        Open
+        Open,
+        Emoji,
+        Reaction
     }
 }

@@ -34,6 +34,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -41,6 +42,36 @@ namespace Infrastructure.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("Answers");
+                });
+
+            modelBuilder.Entity("Core.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Seen")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Core.Entities.Poll", b =>
@@ -57,13 +88,14 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpirationDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PollType")
@@ -72,7 +104,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("ResultsArePublic")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -97,7 +129,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("PollAllowed");
                 });
 
-            modelBuilder.Entity("Core.Entities.PollModerators", b =>
+            modelBuilder.Entity("Core.Entities.PollModerator", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)")
@@ -129,6 +161,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
@@ -395,6 +428,17 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("QuestionId");
                 });
 
+            modelBuilder.Entity("Core.Entities.Notification", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Core.Entities.PollAllowed", b =>
                 {
                     b.HasOne("Core.Entities.Poll", "Poll")
@@ -414,7 +458,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Core.Entities.PollModerators", b =>
+            modelBuilder.Entity("Core.Entities.PollModerator", b =>
                 {
                     b.HasOne("Core.Entities.Poll", "Poll")
                         .WithMany("Moderators")

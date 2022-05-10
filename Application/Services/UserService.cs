@@ -16,6 +16,7 @@ using System.Net.Mail;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Application.Services
 {
@@ -34,14 +35,14 @@ namespace Application.Services
 
         public async Task<IEnumerable<UserBaseDTO>> GetAll()
         {
-            IEnumerable<User> users = await _userManager.Users.ToListAsync() ?? new List<User>();
+            IEnumerable<User> users = await _userManager.Users.ToListAsync();
             return _mapper.Map<List<UserBaseDTO>>(users);
         }
 
         public async Task<UserBaseDTO> Get(string id)
         {
             User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
+            if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");
             }
@@ -77,20 +78,30 @@ namespace Application.Services
                 throw new ObjectValidationException(errors);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await _mailService.SendEmailAsync(user.Email, "Confirm email", token);
+            var encodedToken = HttpUtility.UrlEncode(token);
+            var encodedId = HttpUtility.UrlEncode(user.Id);
+            var replacementData = new Dictionary<string, object>
+                {
+                    {
+                        "ConfirmationLink", $"https://smprojekt.herokuapp.com/ConfirmEmail/{encodedId}/{encodedToken}"
+                    }
+                };
+            await _mailService.SendEmailAsync(user.Email, $"Confirm mail", "confirmation", replacementData);
             return user.Id;
 
         }
 
         public async Task ConfirmEmail(EmailConfirmationDTO confirmationDTO)
         {
-            var user = await _userManager.FindByEmailAsync(confirmationDTO.Email);
-            if (user == null)
+            var userId = HttpUtility.UrlDecode(confirmationDTO.UserId);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
             {
                 throw new ObjectNotFoundException("User does not exists");
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, confirmationDTO.ConfirmationToken);
+            var token = HttpUtility.UrlDecode(confirmationDTO.ConfirmationToken);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             
             if (!result.Succeeded)
             {

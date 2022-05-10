@@ -19,7 +19,7 @@ namespace Core.Entities
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public virtual ICollection<PollAllowed>? AllowedUsers { get; set; }
-        public virtual ICollection<PollModerators>? Moderators { get; set; }
+        public virtual ICollection<PollModerator>? Moderators { get; set; }
         public virtual ICollection<Question>? Questions { get; set; }
         public virtual ICollection<VotingToken>? VotingTokens { get; set; }
         

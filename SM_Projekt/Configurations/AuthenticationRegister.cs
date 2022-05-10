@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SM_Projekt.Helpers;
 using System.Text;
 
 namespace SM_Projekt.Configurations
@@ -14,19 +15,21 @@ namespace SM_Projekt.Configurations
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(o =>
-            {
+            })
+                .AddApiKeySupport(options => { })
+                .AddJwtBearer(o =>
+                    {
 
-                o.SaveToken = true;
-                o.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Key)
-                };
-            });
+                        o.SaveToken = true;
+                        o.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Key)
+                        };
+                    });
         }
     }
 }

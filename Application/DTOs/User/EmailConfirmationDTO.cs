@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,9 @@ namespace Application.DTOs.User
 {
     public class EmailConfirmationDTO
     {
-        public string? Email { get; set; }
-        public string? ConfirmationToken { get; set; }
+        [SwaggerSchema("The uri encoded user identificator", Nullable = false)]
+        public string UserId { get; set; } = string.Empty;
+        [SwaggerSchema("The uri encoded account confirmation token", Nullable = false)]
+        public string? ConfirmationToken { get; set; } = string.Empty;
     }
 }
