@@ -43,7 +43,7 @@ namespace Application.Services
             }
             if (pollToDelete.UserId != userId)
             {
-                throw new AccessForbiddenException("You dont have permissions to delete this notification");
+                throw new AccessForbiddenException("You do not have permissions to delete this notification");
             }
             await _notificationRepository.DeleteAsync(pollToDelete);
         }
@@ -62,7 +62,7 @@ namespace Application.Services
             }
             if (notification.UserId != userId)
             {
-                throw new AccessForbiddenException("You dont have access to this notification");
+                throw new AccessForbiddenException("You do not have access to this notification");
             }
             NotificationBaseDTO result = _mapper.Map<NotificationBaseDTO>(notification);
             return result;
@@ -102,7 +102,7 @@ namespace Application.Services
             }
             if (notification.UserId != userId)
             {
-                throw new AccessForbiddenException("You dont have access to this notification");
+                throw new AccessForbiddenException("You do not have access to this notification");
             }
             notification.Seen = true;
             await _notificationRepository.UpdateAsync(notification);

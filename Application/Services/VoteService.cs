@@ -107,6 +107,7 @@ namespace Application.Services
                 {
                     throw new ObjectNotFoundException("Provided token is not eligible for this poll");
                 }
+                userId = null;
             }
             if (userId is not null && (await _voteRepository.GetByLambdaAsync(x => x.UserId == userId && x.Question.PollId == votes.PollId)).Any())
             {
@@ -114,7 +115,7 @@ namespace Application.Services
             }
             foreach (var vote in votes.Votes)
             {
-                var question = poll.Questions?.First(x => x.Id == vote.QuestionId);
+                var question = poll.Questions?.FirstOrDefault(x => x.Id == vote.QuestionId);
                 if (question is null)
                 {
                     throw new ObjectNotFoundException($"Question with id {vote.QuestionId} does not exists in this poll");
@@ -127,13 +128,21 @@ namespace Application.Services
                     }
                     throw new ObjectValidationException("Open question requires non null AnswerText");
                 }
-                else if (question.Type == QuestionType.Closed && vote.AnswerId is null)
+                else if (question.Type != QuestionType.Open)
                 {
-                    if (vote.AnswerText is not null)
+                    if(vote.AnswerId is null)
                     {
-                        throw new ObjectValidationException("Open question requires null AnswerId");
+                        if (vote.AnswerText is not null)
+                        {
+                            throw new ObjectValidationException("Not open question requires null AnswerText");
+                        }
+                        throw new ObjectValidationException("Not open question requires non null AnswerId");
                     }
-                    throw new ObjectValidationException("Open question requires non null AnswerText");
+                    var answer = question.Answers?.FirstOrDefault(x => x.Id == vote.AnswerId);
+                    if (answer is null)
+                    {
+                        throw new ObjectNotFoundException($"Answer with id {vote.AnswerId} does not exists in question {vote.QuestionId}");
+                    }
                 }
                 await Vote(vote, userId);
             }

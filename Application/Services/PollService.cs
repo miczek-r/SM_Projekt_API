@@ -48,11 +48,7 @@ namespace Application.Services
             }
             if (poll.CreatedBy is not null && (userId is null || (poll.CreatedBy != userId && poll.Moderators.Any(x => x.UserId == userId))))
             {
-                throw new AccessForbiddenException("You dont have permissions to activate this poll");
-            }
-            if (poll.EndDate <= DateTime.Now)
-            {
-                throw new ObjectValidationException("This poll cannot be activated because expiration date must be future");
+                throw new AccessForbiddenException("You do not have permissions to activate this poll");
             }
             if (poll.IsActive == true)
             {
@@ -90,7 +86,7 @@ namespace Application.Services
                         "PollDescription", $"Voting token: {token}"
                     }
                 };
-            await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has ended", "pollStarted", replacementData);
+            await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has started", "pollStarted", replacementData);
         }
 
         public async Task ClosePoll(int pollId)
@@ -103,7 +99,7 @@ namespace Application.Services
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {
-                throw new AccessForbiddenException("You dont have permissions to activate this poll");
+                throw new AccessForbiddenException("You do not have permissions to activate this poll");
             }
             poll.IsActive = false;
             poll.VotingTokens = null;
@@ -167,7 +163,7 @@ namespace Application.Services
             }
             if (pollToDelete.CreatedBy != userId || pollToDelete.CreatedBy is null)
             {
-                throw new AccessForbiddenException("You dont have permissions to delete this poll");
+                throw new AccessForbiddenException("You do not have permissions to delete this poll");
             }
             await _pollRepository.DeleteAsync(pollToDelete);
         }
@@ -194,11 +190,11 @@ namespace Application.Services
             Poll poll = await _pollRepository.GetBySpecAsync(new PollSpecification(x => x.Id == pollId));
             if (poll is null)
             {
-                throw new ObjectNotFoundException();
+                throw new ObjectNotFoundException("This poll does not exist");
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {
-                throw new AccessForbiddenException("You dont have permissions to get this poll info");
+                throw new AccessForbiddenException("You do not have permissions to get this poll info");
             }
             PollInfoDTO result = _mapper.Map<PollInfoDTO>(poll);
             return result;
@@ -239,7 +235,7 @@ namespace Application.Services
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x=>x.UserId == userId))
             {
-                throw new AccessForbiddenException("You dont have permissions to modify this poll");
+                throw new AccessForbiddenException("You do not have permissions to modify this poll");
             }
             poll.AllowAnonymous = pollCreateDTO.AllowAnonymous;
             poll.EndDate = pollCreateDTO.EndDate;
@@ -259,7 +255,7 @@ namespace Application.Services
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {
-                throw new AccessForbiddenException("You dont have permissions to modify this poll");
+                throw new AccessForbiddenException("You do not have permissions to modify this poll");
             }
             if (poll.AllowedUsers is null)
             {
@@ -294,7 +290,7 @@ namespace Application.Services
             }
             if (userId is null || (poll.CreatedBy != userId || poll.CreatedBy is null) && poll.Moderators.Any(x => x.UserId == userId))
             {
-                throw new AccessForbiddenException("You dont have permissions to modify this poll");
+                throw new AccessForbiddenException("You do not have permissions to modify this poll");
             }
 
             poll.Moderators = new List<PollModerator>();
