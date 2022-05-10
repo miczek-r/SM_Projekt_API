@@ -20,17 +20,17 @@ namespace SM_Projekt.Controllers
         {
             _authenticationService = authenticationService;
         }
-
-        /// <summary>
-        /// Login
-        /// </summary>
-        /// <remarks>Allows loging in using JWT Token.</remarks>
-        /// <param name="loginDTO"></param>
-        /// <returns>Returns LoginResponseDTO which contains JWT Token and its expiration date</returns>
+        
         [AllowAnonymous]
-        [HttpPost("/login", Name = "Login")]
+        [HttpPost("/login")]
+        [SwaggerOperation(
+            Summary = "Logs user in",
+            Description = @"Logs user in using provided data.
+                            Returns JWT token with its expiration date",
+            OperationId = "Login"
+            )]
         [SwaggerResponse(StatusCodes.Status200OK, "Login success", Type = typeof(LoginResponseDTO))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "User is not activated or he is locked in")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "User data is invalid, he is not activated or he is locked in")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginDTO loginDTO)

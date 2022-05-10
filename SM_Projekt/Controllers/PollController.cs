@@ -21,60 +21,94 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpGet]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<PollBaseDTO>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(
+            Summary = "Returns all public polls",
+            Description = @"Returns all public polls.",
+            OperationId = "GetAllPolls"
+            )]
+        [SwaggerResponse(StatusCodes.Status200OK, "The public polls were returned", Type = typeof(IEnumerable<PollBaseDTO>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetAll()
         {
             return Ok(await _pollService.GetAll());
         }
 
         [HttpGet("{pollId}")]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(PollBaseDTO))]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(
+            Summary = "Returns specific poll",
+            Description = @"Returns specific poll by provided poll identificator.
+                            The poll must be public, hidden or you must be in allowed users.
+                            If AllowAnonymous is false then you have to be logged in",
+            OperationId = "GetPoll"
+            )]
+        [SwaggerResponse(StatusCodes.Status200OK, "The poll with provided identificator was returned", Type = typeof(PollBaseDTO))]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<PollBaseDTO>> Get(int pollId)
         {
             return Ok(await _pollService.Get(pollId));
         }
 
         [HttpGet("GetInfo/{pollId}")]
+        [SwaggerOperation(
+            Summary = "Returns specific poll info",
+            Description = @"Returns specific poll info by provided poll identificator.
+                            The poll must be public, hidden or you must be in allowed users.
+                            If AllowAnonymous is false then you have to be logged in",
+            OperationId = "GetPollInfo"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(PollBaseDTO))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, "The poll information for provided identificator were returned", Type = typeof(PollBaseDTO))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<PollBaseDTO>> GetInfo(int pollId)
         {
             return Ok(await _pollService.GetInfo(pollId));
         }
 
         [HttpGet("MyPolls")]
+        [SwaggerOperation(
+            Summary = "Returns all polls for logged in user",
+            Description = @"Returns all polls that user created or is allowed to vote in by JWT Token.
+                            The poll must be protected or private and you must be in allowed users.",
+            OperationId = "GetMyPolls"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<PollBaseDTO>))]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, "The polls for current user were returned", Type = typeof(IEnumerable<PollBaseDTO>))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> GetMyPolls()
         {
             return Ok(await _pollService.GetMyPolls());
         }
 
-        /*[HttpPut("{id}")]
+        /*
+         * TODO: Decide if should be removed
+         * [HttpPut("{id}")]
         public async Task<ActionResult<IEnumerable<PollBaseDTO>>> Put(int id, PollCreateDTO poll)
         {
             return Ok(await _pollService.Update(poll,id));
         }*/
 
         [HttpPut("Activate/{pollId}")]
+        [SwaggerOperation(
+            Summary = "Activates poll",
+            Description = @"Activates poll by provided poll identificator.
+                            You must be poll owner or moderator to activate it.
+                            Your eligibility status is based on JWT Token.",
+            OperationId = "ActivatePoll"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status204NoContent)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully activated poll with provided indentificator")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The poll data is invalid")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> Activate(int pollId)
         {
             await _pollService.OpenPoll(pollId);
@@ -82,12 +116,19 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpPut("Invite/{pollId}")]
+        [SwaggerOperation(
+            Summary = "Invites to poll",
+            Description = @"Adds users to AllowedUsers in poll provided by poll identificator.
+                            If the poll is running it also sends notification and mail.
+                            If the poll is not running only notification is sent.",
+            OperationId = "InviteToPoll"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status204NoContent)]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully invited users to poll with provided indentificator")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> InviteToPoll(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.InviteUsers(pollId, pollInviteDTO);
@@ -95,12 +136,18 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpPut("SetModerators/{pollId}")]
+        [SwaggerOperation(
+            Summary = "Sets poll moderators",
+            Description = @"Sets new moderator list by provided userIds list in poll provided by poll identificator.
+                            It also sends notification about beeing moderator",
+            OperationId = "SetPollModerators"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status204NoContent)]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully set moderators for poll with provided indentificator")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> SetPollModerators(int pollId, PollInviteDTO pollInviteDTO)
         {
             await _pollService.SetPollModerators(pollId, pollInviteDTO);
@@ -108,13 +155,20 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpDelete("{pollId}")]
+        [SwaggerOperation(
+            Summary = "Deactivates poll",
+            Description = @"Deactivates poll using provided poll identificator.
+                            It also sends notification that poll ended.
+                            You must be poll owner or moderator to activate it.
+                            Your eligibility status is based on JWT Token.",
+            OperationId = "DeactivatePoll"
+            )]
         [Authorize]
-        [SwaggerResponse(StatusCodes.Status204NoContent)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully removed poll with provided indentificator")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "You must be logged in to access this resource")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> Delete(int pollId)
         {
             await _pollService.ClosePoll(pollId);
@@ -122,11 +176,16 @@ namespace SM_Projekt.Controllers
         }
 
         [HttpPost]
-        [SwaggerResponse(StatusCodes.Status201Created)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status403Forbidden)]
-        [SwaggerResponse(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(
+            Summary = "Creates new poll",
+            Description = @"Creates poll using provided data.",
+            OperationId = "CreatePoll"
+            )]
+        [SwaggerResponse(StatusCodes.Status201Created, "The poll was created", Type = typeof(PollBaseDTO))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "The poll data is invalid")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "You do not have permissions to access this resource")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "The poll you are looking for does not exists")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
             
