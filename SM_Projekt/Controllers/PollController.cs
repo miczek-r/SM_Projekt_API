@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SM_Projekt.Helpers;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
@@ -172,6 +173,40 @@ namespace SM_Projekt.Controllers
         public async Task<ActionResult> Delete(int pollId)
         {
             await _pollService.ClosePoll(pollId);
+            return NoContent();
+        }
+
+        [HttpPut("OpenPolls")]
+        [SwaggerOperation(
+            Summary = "Opens polls",
+            Description = @"Opens all polls which start date is in past and end date in future.
+                            Dedicated for Service Worker, requires API Key authentication",
+            OperationId = "OpenAllPolls"
+            )]
+        [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultScheme)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully activated polls")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "This endpoint is designed for Service Worker")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
+        public async Task<ActionResult> OpenAllPolls()
+        {
+            await _pollService.OpenAllPolls();
+            return NoContent();
+        }
+
+        [HttpPut("ClosePolls")]
+        [SwaggerOperation(
+            Summary = "Closes polls",
+            Description = @"Closes all polls which end date is in past.
+                            Dedicated for Service Worker, requires API Key authentication",
+            OperationId = "CloseAllPolls"
+            )]
+        [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultScheme)]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Successfully activated polls")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "This endpoint is designed for Service Worker")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
+        public async Task<ActionResult> CloseAllPolls()
+        {
+            await _pollService.CloseAllPolls();
             return NoContent();
         }
 

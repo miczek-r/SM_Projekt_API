@@ -138,10 +138,6 @@ namespace Application.Services
                 {
                     throw new AccessForbiddenException("You must be logged in to create protected and private polls");
                 }
-                if (pollCreateDTO.StartDate is not null)
-                {
-                    throw new AccessForbiddenException("You must be logged in to create polls with specific start date");
-                }
             }
             Poll newPoll = _mapper.Map<Poll>(pollCreateDTO);
             newPoll.CreatedBy = userId;
@@ -314,6 +310,72 @@ namespace Application.Services
                     )?.Value;
             }
             return userId;
+        }
+
+        public async Task OpenAllPolls()
+        {
+            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x =>  x.StartDate <= DateTime.Now && (x.EndDate == null || x.EndDate >= DateTime.Now) && !x.IsActive));
+            foreach (Poll poll in polls)
+            {
+                poll.IsActive = true;
+                await _pollRepository.UpdateAsync(poll);
+
+
+                if (poll.VotingTokens is null)
+                {
+                    poll.VotingTokens = new List<VotingToken>();
+                }
+                foreach (PollAllowed user in poll.AllowedUsers)
+                {
+                    try
+                    {
+                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
+                        if (poll.PollType == Core.Enums.PollType.Protected)
+                        {
+                            await SendVotingToken(poll, user.User);
+                        }
+                    }
+                    catch
+                    {
+                        // TODO: Add loging or smthing
+                    }
+                }
+            }
+
+        }
+
+        public async Task CloseAllPolls()
+        {
+            IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.EndDate <= DateTime.Now && x.IsActive));
+            foreach (Poll poll in polls)
+            {
+                poll.IsActive = false;
+                poll.VotingTokens = null;
+                foreach (PollAllowed user in poll.AllowedUsers)
+                {
+                    try
+                    {
+                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has ended", Message = $"The poll: '{poll.Name}' has ended.", UserId = user.UserId });
+
+                        var replacementData = new Dictionary<string, object>
+                            {
+                                {
+                                    "PollName", poll.Name
+                                },
+                                {
+                                    "PollDescription", "ergerg"
+                                }
+                            };
+
+                        await _mailService.SendEmailAsync(user.User.Email, $"Poll '{poll.Name}' has ended", "pollEnded", replacementData);
+                    }
+                    catch
+                    {
+                        // TODO: Add loging or smthing }
+                    }
+                }
+                await _pollRepository.UpdateAsync(poll);
+            }
         }
     }
 }

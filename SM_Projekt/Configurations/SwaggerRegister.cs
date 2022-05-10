@@ -24,13 +24,21 @@ namespace SM_Projekt.Configurations
                 c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
                 c.SwaggerDoc("v1", info);
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-            {
+                {
                     Name = "Authorization",
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
                     Description = "JWT Authorization header using the Bearer scheme."
+                });
+                c.AddSecurityDefinition("API Key", new OpenApiSecurityScheme
+                {
+                    Name = "X-Api-Key",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "API Key",
+                    In = ParameterLocation.Header,
+                    Description = "Api Key"
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
@@ -39,11 +47,32 @@ namespace SM_Projekt.Configurations
                         {
                         Reference = new OpenApiReference
                             {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                            }
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "Bearer",
+                            Name = "Authorization",
+                            In = ParameterLocation.Header,
+                            Type = SecuritySchemeType.ApiKey
                         },
-                        Array.Empty<string>()
+                        new[] { "readAccess", "writeAccess" }
+                    }
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference {
+                                Type = ReferenceType.SecurityScheme, 
+                                Id = "API Key" }
+                            ,
+                            Scheme = "API Key",
+                            Name = "X-Api-Key",
+                            In = ParameterLocation.Header,
+                            Type = SecuritySchemeType.ApiKey
+                        },
+                        new[] { "readAccess", "writeAccess" }
                     }
                 });
             });
