@@ -71,6 +71,7 @@ namespace Application.Services
             {
                 token = Guid.NewGuid().ToString();
                 poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
+                await _pollRepository.UpdateAsync(poll);
             }
             var replacementData = new Dictionary<string, object>
                 {
