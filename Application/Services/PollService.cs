@@ -354,10 +354,8 @@ namespace Application.Services
                     try
                     {
                         await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
-                        if (poll.PollType == Core.Enums.PollType.Protected)
-                        {
-                            await SendVotingToken(poll, user.User);
-                        }
+                        await SendVotingToken(poll, user.User, poll.PollType == Core.Enums.PollType.Protected);
+                        
                     }
                     catch
                     {
