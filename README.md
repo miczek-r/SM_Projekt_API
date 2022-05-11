@@ -154,9 +154,10 @@ Docker or Visual Studio 2022
 2.2 Open project in Visual Studio 2022
 
 3.2 If Docker is not working then change launchSetting to IIS Express
+
 ![Folder structure](https://github.com/miczek-r/SM_Projekt_API/blob/Development/ReadMeData/launch_settings.png?raw=true)
 
-4.2 Application should automaticly display swagger page
+4.2 Application should automatically display swagger page
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
