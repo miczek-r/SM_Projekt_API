@@ -1,8 +1,5 @@
-﻿using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
-using Swashbuckle.AspNetCore.Swagger;
-using System.Reflection;
 
 namespace SM_Projekt.Configurations
 {
@@ -64,7 +61,7 @@ namespace SM_Projekt.Configurations
                         new OpenApiSecurityScheme
                         {
                             Reference = new OpenApiReference {
-                                Type = ReferenceType.SecurityScheme, 
+                                Type = ReferenceType.SecurityScheme,
                                 Id = "API Key" }
                             ,
                             Scheme = "API Key",

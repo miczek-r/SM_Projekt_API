@@ -6,12 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTests
 {
@@ -37,14 +32,14 @@ namespace UnitTests
 
                     db.Database.EnsureCreated();
 
-                    
-                       Utilities.InitializeDbForTests(db);
-                    
+
+                    Utilities.InitializeDbForTests(db);
+
                 }
 
             });
 
-            
+
 
             return base.CreateHost(builder);
         }

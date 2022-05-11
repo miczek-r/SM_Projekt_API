@@ -26,9 +26,9 @@ namespace SM_Projekt.Helpers
                 response.StatusCode = ex switch
                 {
                     AccessForbiddenException => (int)HttpStatusCode.Forbidden,
-                    ObjectAlreadyExistsException  => (int)HttpStatusCode.BadRequest,
-                    ObjectNotFoundException  => (int)HttpStatusCode.NotFound,
-                    ObjectValidationException  => (int)HttpStatusCode.BadRequest,
+                    ObjectAlreadyExistsException => (int)HttpStatusCode.BadRequest,
+                    ObjectNotFoundException => (int)HttpStatusCode.NotFound,
+                    ObjectValidationException => (int)HttpStatusCode.BadRequest,
                     _ => (int)HttpStatusCode.InternalServerError,
                 };
                 var result = JsonSerializer.Serialize(new { message = ex?.Message });

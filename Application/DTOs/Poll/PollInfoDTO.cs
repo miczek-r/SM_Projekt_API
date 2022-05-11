@@ -1,13 +1,7 @@
 ﻿using Application.DTO.User;
 using Application.DTOs.Question;
-using Core.Entities;
 using Core.Enums;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.DTOs.Poll
 {

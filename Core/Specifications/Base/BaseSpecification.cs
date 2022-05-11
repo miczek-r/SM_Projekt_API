@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Core.Specifications.Base
 {
-    public abstract class BaseSpecification<T> :ISpecification<T> where T : class
+    public abstract class BaseSpecification<T> : ISpecification<T> where T : class
     {
         public BaseSpecification(Expression<Func<T, bool>> criteria)
         {

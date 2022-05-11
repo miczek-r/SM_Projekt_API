@@ -1,17 +1,8 @@
-﻿using Application.DTO;
-using Application.DTOs.Poll;
-using Application.DTOs.User;
-using Application.DTOs.Vote;
-using Application.Validators;
-using Application.Validators.Authentication;
-using Application.Validators.Poll;
-using Application.Validators.User;
-using Application.Validators.Vote;
+﻿using Application.Validators;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Newtonsoft.Json.Converters;
-using System.Reflection;
 
 namespace SM_Projekt.Configurations
 {

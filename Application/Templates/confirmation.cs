@@ -3,8 +3,8 @@ namespace Application.Templates
 {
     public class ConfirmationTemplate
     {
-        public const string Template = 
-		@"<!DOCTYPE html>
+        public const string Template =
+        @"<!DOCTYPE html>
 
 		<html lang='en' xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:v='urn:schemas-microsoft-com:vml'>
 		<head>

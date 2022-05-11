@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SM_Projekt.Helpers;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 
 namespace SM_Projekt.Controllers
 {
@@ -223,7 +222,7 @@ namespace SM_Projekt.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
         public async Task<ActionResult> Post([FromBody] PollCreateDTO pollCreateDTO)
         {
-            
+
             int id = await _pollService.Create(pollCreateDTO);
             PollBaseDTO poll = await _pollService.Get(id);
             return CreatedAtAction(nameof(PollController.Post), new { id }, poll);

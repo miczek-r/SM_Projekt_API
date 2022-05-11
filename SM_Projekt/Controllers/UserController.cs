@@ -30,7 +30,8 @@ namespace SM_Projekt.Controllers
             )]
         [SwaggerResponse(StatusCodes.Status200OK, "The users were returned", Type = typeof(IEnumerable<UserBaseDTO>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Oops! Internal Server Error. Try again later")]
-        public async Task<ActionResult<IEnumerable<UserBaseDTO>>> GetAll() {
+        public async Task<ActionResult<IEnumerable<UserBaseDTO>>> GetAll()
+        {
             return Ok(await _userService.GetAll());
         }
 

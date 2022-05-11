@@ -1,20 +1,15 @@
 ﻿using Application.DTO;
+using Application.Exceptions;
 using Application.Interfaces;
 using Core.Entities;
 using Core.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Configuration;
-using Application.Exceptions;
 using System.Security.Principal;
+using System.Text;
 
 namespace Application.Services
 {

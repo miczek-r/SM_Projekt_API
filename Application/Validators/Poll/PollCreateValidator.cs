@@ -1,12 +1,6 @@
 ﻿using Application.DTOs.Poll;
-using Application.DTOs.Question;
 using Core.Enums;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Validators.Poll
 {
@@ -14,11 +8,11 @@ namespace Application.Validators.Poll
     {
         public PollCreateValidator()
         {
-            RuleFor(x=> x.Name).NotEmpty();
+            RuleFor(x => x.Name).NotEmpty();
             RuleFor(x => x.Questions).NotNull();
-            RuleFor(x => x.Questions).Must(y=> y.Any()).WithMessage("At least one question is reqiuerd").When(x=>x.Questions is not null);
-            RuleFor(x => x.StartDate).GreaterThanOrEqualTo(DateTime.Now).When(x=> x.StartDate is not null).WithMessage("Start date must be in future");
-            RuleFor(x => x.EndDate).GreaterThanOrEqualTo(x => x.StartDate.Value.AddMinutes(15)).When(x=> x.StartDate is not null && x.EndDate is not null).WithMessage("The poll minimum length is 15 minutes");
+            RuleFor(x => x.Questions).Must(y => y.Any()).WithMessage("At least one question is reqiuerd").When(x => x.Questions is not null);
+            RuleFor(x => x.StartDate).GreaterThanOrEqualTo(DateTime.Now).When(x => x.StartDate is not null).WithMessage("Start date must be in future");
+            RuleFor(x => x.EndDate).GreaterThanOrEqualTo(x => x.StartDate.Value.AddMinutes(15)).When(x => x.StartDate is not null && x.EndDate is not null).WithMessage("The poll minimum length is 15 minutes");
             RuleFor(x => x.EndDate).GreaterThanOrEqualTo(DateTime.Now.AddMinutes(15)).When(x => x.StartDate is null && x.EndDate is not null).WithMessage("The poll minimum length is 15 minutes");
             RuleFor(x => x.PollType).IsInEnum();
             RuleForEach(x => x.Questions).SetValidator(new QuestionCreateValidator()).When(x => x.Questions is not null); ;

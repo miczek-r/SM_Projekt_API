@@ -1,6 +1,5 @@
-using SM_Projekt.Helpers;
-
 using SM_Projekt.Configurations;
+using SM_Projekt.Helpers;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);

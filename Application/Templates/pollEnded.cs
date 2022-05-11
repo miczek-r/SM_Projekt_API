@@ -1,10 +1,10 @@
 
 namespace Application.Templates
 {
-	public class PollEndedTemplate
-	{
-		public const string Template =
-		@"
+    public class PollEndedTemplate
+    {
+        public const string Template =
+        @"
 		<!DOCTYPE html>
 
 		<html lang='en' xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:v='urn:schemas-microsoft-com:vml'>
@@ -391,6 +391,6 @@ namespace Application.Templates
 		</table><!-- End -->
 		</body>
 		</html>";
-	}
+    }
 
 }

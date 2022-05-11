@@ -7,12 +7,7 @@ using Core.Enums;
 using Core.Repositories;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -59,7 +54,7 @@ namespace Application.Services
 
                 var votesInQuestion = await _voteRepository.GetByLambdaAsync(x => x.QuestionId == question.Id);
                 votes.AddRange(votesInQuestion);
-                if(question.Type == QuestionType.Open)
+                if (question.Type == QuestionType.Open)
                 {
                     continue;
                 }
@@ -85,7 +80,7 @@ namespace Application.Services
             {
                 throw new ObjectNotFoundException("This poll does not exists");
             }
-            if(!poll.AllowAnonymous && userId is null)
+            if (!poll.AllowAnonymous && userId is null)
             {
                 throw new AccessForbiddenException("You must be logged in to vote in this poll");
             }
@@ -99,11 +94,11 @@ namespace Application.Services
             }
             if (poll.PollType == PollType.Protected)
             {
-                if(votes.VotingToken is null)
+                if (votes.VotingToken is null)
                 {
                     throw new AccessForbiddenException("For this poll voting token is needed");
                 }
-                if(!poll.VotingTokens.Any(x=> x.Token == votes.VotingToken))
+                if (!poll.VotingTokens.Any(x => x.Token == votes.VotingToken))
                 {
                     throw new ObjectNotFoundException("Provided token is not eligible for this poll");
                 }
@@ -122,7 +117,7 @@ namespace Application.Services
                 }
                 if (question.Type == QuestionType.Open && vote.AnswerText is null)
                 {
-                    if(vote.AnswerId is not null)
+                    if (vote.AnswerId is not null)
                     {
                         throw new ObjectValidationException("Open question requires null AnswerId");
                     }
@@ -130,7 +125,7 @@ namespace Application.Services
                 }
                 else if (question.Type != QuestionType.Open)
                 {
-                    if(vote.AnswerId is null)
+                    if (vote.AnswerId is null)
                     {
                         if (vote.AnswerText is not null)
                         {
