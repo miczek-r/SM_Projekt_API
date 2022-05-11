@@ -59,25 +59,38 @@ namespace Application.Services
             foreach (PollAllowed user in poll.AllowedUsers)
             {
                 await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.UserId });
-                if (poll.PollType == Core.Enums.PollType.Protected)
-                {
-                    await SendVotingToken(poll, user.User);
-                }
+                await SendVotingToken(poll, user.User, poll.PollType == Core.Enums.PollType.Protected);
             }
 
         }
 
-        private async Task SendVotingToken(Poll poll, User user)
+        private async Task SendVotingToken(Poll poll, User user, bool withToken = false)
         {
-            string token = Guid.NewGuid().ToString();
-            poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
+            string token = null;
+            if (withToken)
+            {
+                token = Guid.NewGuid().ToString();
+                poll.VotingTokens.Add(new VotingToken { PollId = poll.Id, Token = token });
+            }
             var replacementData = new Dictionary<string, object>
                 {
                     {
                         "PollName", poll.Name
                     },
                     {
-                        "PollDescription", $"Voting token: {token}"
+                        "PollId", poll.Id
+                    },
+                    {
+                        "VotingEndDate", poll.EndDate?.ToString() ?? "No end date"
+                    },
+                    {
+                        "PollType", poll.PollType.ToString()
+                    },
+                    {
+                        "ResultsPublicity", poll.ResultsArePublic ? "Public" : "Private"
+                    },
+                    {
+                        "VotingToken", token??"Not needed"
                     }
                 };
             await _mailService.SendEmailAsync(user.Email, $"Poll '{poll.Name}' has started", "pollStarted", replacementData);
@@ -139,6 +152,17 @@ namespace Application.Services
             if (newPoll.StartDate is null)
             {
                 await OpenPoll(newPoll.Id);
+            }
+            else
+            {
+                foreach (PollAllowed user in newPoll.AllowedUsers)
+                {
+                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"You have been invited to '{newPoll.Name}'", Message = $"The poll starts at: '{newPoll.StartDate}' has started.", UserId = user.UserId });
+                }
+            }
+            foreach (PollModerator user in newPoll.Moderators)
+            {
+                await _notificationService.Create(new NotificationCreateDTO() { Title = $"You have been added as '{newPoll.Name}' moderator", Message = $"You have been added as '{newPoll.Name}' moderator", UserId = user.UserId });
             }
             return newPoll.Id;
         }
@@ -259,11 +283,15 @@ namespace Application.Services
                     if (user is null) continue;
                     poll.AllowedUsers.Add(new PollAllowed() { UserId = id, PollId = poll.Id });
 
-                    await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
 
                     if (poll.PollType == Core.Enums.PollType.Protected && poll.IsActive)
                     {
-                        await SendVotingToken(poll, user);
+                        await SendVotingToken(poll, user, poll.PollType == PollType.Protected);
+                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"Poll '{poll.Name}' has started", Message = $"The poll: '{poll.Name}' has started.", UserId = user.Id });
+                    }
+                    else
+                    {
+                        await _notificationService.Create(new NotificationCreateDTO() { Title = $"You have been invited to '{poll.Name}'", Message = $"The poll starts at: '{poll.StartDate}' has started.", UserId = user.Id });
                     }
                 }
             }
@@ -289,7 +317,8 @@ namespace Application.Services
             {
                 var user = await _userManager.FindByIdAsync(id);
                 if (user is null) continue;
-                poll.Moderators.Add(new PollModerator() { UserId = id, PollId = poll.Id });
+                poll.Moderators.Add(new PollModerator() { UserId = id, PollId = poll.Id }); 
+                await _notificationService.Create(new NotificationCreateDTO() { Title = $"You have been added as '{poll.Name}' moderator", Message = $"You have been added as '{poll.Name}' moderator", UserId = user.Id });
             }
             await _pollRepository.UpdateAsync(poll);
         }
