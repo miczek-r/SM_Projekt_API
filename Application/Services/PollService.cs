@@ -338,7 +338,7 @@ namespace Application.Services
 
         public async Task OpenAllPolls()
         {
-            var time = DateTime.Now;
+            var time = DateTime.Now.AddHours(2);
             IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.StartDate <= time && (x.EndDate == null || x.EndDate >= time) && !x.IsActive));
             foreach (Poll poll in polls)
             {
@@ -369,7 +369,7 @@ namespace Application.Services
 
         public async Task CloseAllPolls()
         {
-            var time = DateTime.Now;
+            var time = DateTime.Now.AddHours(2);
             IEnumerable<Poll> polls = await _pollRepository.GetAllBySpecAsync(new PollSpecification(x => x.EndDate <= time && x.IsActive));
             foreach (Poll poll in polls)
             {
